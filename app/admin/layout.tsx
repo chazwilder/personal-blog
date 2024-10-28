@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 import "../globals.css";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: "The Curious Coder",
@@ -20,13 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <div className={`antialiased w-full min-h-screen h-full`}>
-        <SignedOut>
-          <SignInButton />
-        </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
+      <div className={`antialiased w-full min-h-[80vh] h-full flex flex-col`}>
         {children}
       </div>
     </ClerkProvider>

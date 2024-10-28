@@ -1,223 +1,256 @@
-// components/admin/BlogEditor.tsx
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { BlockToolConstructable, OutputData } from "@editorjs/editorjs";
 
-type EditorJS = any;
+type HeaderConfig = {
+  levels: number[];
+  defaultLevel: number;
+  placeholder?: string;
+};
 
-const BlogEditor = () => {
-  const editorRef = useRef<EditorJS>();
+type ListConfig = {
+  defaultStyle: "unordered" | "ordered";
+};
+
+type QuoteConfig = {
+  quotePlaceholder: string;
+  captionPlaceholder: string;
+};
+
+type ImageConfig = {
+  endpoints: {
+    byFile: string;
+    byUrl: string;
+  };
+  uploader?: {
+    uploadByFile(
+      file: File,
+    ): Promise<{ success: number; file: { url: string } }>;
+  };
+};
+
+type EmbedConfig = {
+  services: {
+    youtube?: boolean;
+    codesandbox?: boolean;
+    codepen?: boolean;
+    gist?: boolean;
+  };
+};
+
+type TableConfig = {
+  rows?: number;
+  cols?: number;
+};
+
+type AttachesConfig = {
+  endpoint: string;
+  buttonText?: string;
+  errorMessage?: string;
+};
+
+interface ToolConstructable {
+  class: BlockToolConstructable;
+  config?: any;
+  inlineToolbar?: boolean;
+  shortcut?: string;
+}
+
+type Tools = {
+  header: ToolConstructable & { config: HeaderConfig };
+  paragraph: { inlineToolbar: boolean };
+  list: ToolConstructable & { config: ListConfig };
+  checklist: ToolConstructable;
+  quote: ToolConstructable & { config: QuoteConfig };
+  delimiter: BlockToolConstructable;
+  image: ToolConstructable & { config: ImageConfig };
+  code: ToolConstructable;
+  attaches: ToolConstructable & { config: AttachesConfig };
+  embed: ToolConstructable & { config: EmbedConfig };
+  table: ToolConstructable & { config: TableConfig };
+  mermaid: ToolConstructable;
+  raw: BlockToolConstructable;
+};
+
+interface BlogEditorProps {
+  onChange?: (data: OutputData) => void;
+  initialData?: OutputData | null;
+}
+
+const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
+  const editorRef = useRef<any>(null);
   const holderRef = useRef<HTMLDivElement>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    if (editorRef.current || !holderRef.current || isReady) {
+      return;
+    }
+
     const loadEditor = async () => {
       try {
         const [
           { default: EditorJS },
           { default: Header },
           { default: List },
-          { default: Code },
-          { default: LinkTool },
-          { default: Image },
-          { default: Embed },
-          { default: Quote },
           { default: Checklist },
+          { default: Quote },
           { default: Delimiter },
-          { default: Marker },
-          { default: Table },
-          { default: Warning },
-          { default: InlineCode },
-          { default: Alert },
-          { default: Title },
+          { default: Image },
+          { default: Code },
           { default: Attaches },
+          { default: Embed },
+          { default: Table },
           { default: MermaidTool },
-          { default: Hyperlink },
           { default: Raw },
-          { default: DragDrop },
-          { default: Undo },
         ] = await Promise.all([
           import("@editorjs/editorjs"),
           import("@editorjs/header"),
-          import("@editorjs/nested-list"),
-          import("@editorjs/code"),
-          import("@editorjs/link"),
-          import("@editorjs/image"),
-          import("@editorjs/embed"),
-          import("@editorjs/quote"),
+          import("@editorjs/list"),
           import("@editorjs/checklist"),
+          import("@editorjs/quote"),
           import("@editorjs/delimiter"),
-          import("@editorjs/marker"),
-          import("@editorjs/table"),
-          import("@editorjs/warning"),
-          import("@editorjs/inline-code"),
-          import("editorjs-alert"),
-          import("title-editorjs"),
+          import("@editorjs/image"),
+          import("@editorjs/code"),
           import("@editorjs/attaches"),
+          import("@editorjs/embed"),
+          import("@editorjs/table"),
           import("editorjs-mermaid"),
-          import("editorjs-hyperlink"),
           import("@editorjs/raw"),
-          import("editorjs-drag-drop"),
-          import("editorjs-undo"),
         ]);
 
-        if (!holderRef.current || editorRef.current) {
-          return;
-        }
+        const tools = {
+          header: {
+            class: Header,
+            config: {
+              levels: [1, 2, 3, 4, 5, 6],
+              defaultLevel: 1,
+              placeholder: "Heading",
+            },
+            shortcut: "CMD+SHIFT+H",
+          },
+          paragraph: {
+            inlineToolbar: true,
+          },
+          list: {
+            class: List,
+            inlineToolbar: true,
+            config: {
+              defaultStyle: "unordered",
+            },
+          },
+          checklist: {
+            class: Checklist,
+            inlineToolbar: true,
+          },
+          quote: {
+            class: Quote,
+            inlineToolbar: true,
+            config: {
+              quotePlaceholder: "Enter a quote",
+              captionPlaceholder: "Quote author",
+            },
+          },
+          delimiter: Delimiter,
+          image: {
+            class: Image,
+            config: {
+              endpoints: {
+                byFile: "/api/upload",
+                byUrl: "/api/fetch-image",
+              },
+            },
+          },
+          code: {
+            class: Code,
+            shortcut: "CMD+SHIFT+C",
+          },
+          attaches: {
+            class: Attaches,
+            config: {
+              endpoint: "/api/upload",
+              buttonText: "Upload a file",
+            },
+          },
+          embed: {
+            class: Embed,
+            config: {
+              services: {
+                youtube: true,
+                codesandbox: true,
+                codepen: true,
+                gist: true,
+              },
+            },
+          },
+          table: {
+            class: Table,
+            inlineToolbar: true,
+            config: {
+              rows: 2,
+              cols: 3,
+            },
+          },
+          mermaid: {
+            class: MermaidTool,
+          },
+          raw: Raw,
+        };
 
         const editor = new EditorJS({
           holder: holderRef.current,
-          placeholder: "Let's write an awesome blog post!",
-          inlineToolbar: true,
-          tools: {
-            title: {
-              class: Title,
-            },
-            alert: {
-              class: Alert,
-              inlineToolbar: true,
-              shortcut: "CMD+SHIFT+A",
-              config: {
-                defaultType: "info",
-                messagePlaceholder: "Enter something",
-              },
-            },
-            attaches: {
-              class: Attaches,
-              config: {
-                endpoint: "/api/upload-file",
-                buttonText: "Select file",
-                errorMessage: "File upload failed",
-              },
-            },
-            mermaid: {
-              class: MermaidTool,
-            },
-            hyperlink: {
-              class: Hyperlink,
-              config: {
-                shortcut: "CMD+L",
-                target: "_blank",
-                rel: "nofollow",
-                availableTargets: ["_blank", "_self"],
-                availableRels: ["nofollow", "noreferrer"],
-                validate: true,
-              },
-            },
-            raw: Raw,
-            header: {
-              class: Header,
-              config: {
-                levels: [1, 2, 3, 4, 5, 6],
-                defaultLevel: 1,
-                placeholder: "Heading",
-              } as const,
-              shortcut: "CMD+SHIFT+H",
-            },
-            list: {
-              class: List,
-              inlineToolbar: true,
-              config: {
-                defaultStyle: "unordered",
-              },
-              shortcut: "CMD+SHIFT+L",
-            },
-            code: {
-              class: Code,
-              shortcut: "CMD+SHIFT+C",
-            },
-            linkTool: {
-              class: LinkTool,
-              config: {
-                endpoint: "/api/link-meta",
-              },
-            },
-            image: {
-              class: Image,
-              config: {
-                endpoints: {
-                  byFile: "/api/upload-image",
-                  byUrl: "/api/fetch-image",
-                },
-                uploader: {
-                  uploadByFile(file: File) {
-                    return Promise.resolve({
-                      success: 1,
-                      file: {
-                        url: "https://example.com/image.png",
-                      },
-                    });
-                  },
-                },
-              },
-            },
-            embed: {
-              class: Embed,
-              config: {
-                services: {
-                  youtube: true,
-                  codesandbox: true,
-                  codepen: true,
-                  gist: true,
-                },
-              },
-            },
-            quote: {
-              class: Quote,
-              inlineToolbar: true,
-              shortcut: "CMD+SHIFT+Q",
-              config: {
-                quotePlaceholder: "Enter a quote",
-                captionPlaceholder: "Quote's author",
-              },
-            },
-            checklist: {
-              class: Checklist,
-              inlineToolbar: true,
-            },
-            delimiter: Delimiter,
-            table: {
-              class: Table,
-              inlineToolbar: true,
-              config: {
-                rows: 2,
-                cols: 3,
-              },
-            },
-            warning: {
-              class: Warning,
-              inlineToolbar: true,
-              config: {
-                titlePlaceholder: "Title",
-                messagePlaceholder: "Message",
-              },
-            },
-            marker: {
-              class: Marker,
-              shortcut: "CMD+SHIFT+M",
-            },
-            inlineCode: {
-              class: InlineCode,
-              shortcut: "CMD+SHIFT+C",
-            },
+          tools,
+          placeholder: "Press '/' for commands...",
+          defaultBlock: "paragraph",
+          inlineToolbar: ["bold", "italic", "link"],
+          data: initialData || { blocks: [] },
+          onChange: async () => {
+            try {
+              if (onChange && editor) {
+                const content = await editor.save();
+                onChange(content);
+              }
+            } catch (e) {
+              console.error("Editor save failed:", e);
+            }
           },
-          data: {
-            blocks: [],
-          },
-          autofocus: true,
-          onChange: () => {
-            console.log("Content changed");
+          i18n: {
+            messages: {
+              tools: {
+                header: {
+                  "Heading 1": "Heading 1",
+                  "Heading 2": "Heading 2",
+                  "Heading 3": "Heading 3",
+                  "Heading 4": "Heading 4",
+                  "Heading 5": "Heading 5",
+                  "Heading 6": "Heading 6",
+                },
+                list: {
+                  "Bullet List": "Bullet List",
+                  "Numbered List": "Numbered List",
+                },
+                checklist: "Checklist",
+                quote: "Quote",
+                delimiter: "Divider",
+                image: "Image",
+                code: "Code",
+                attaches: "File Attachment",
+                embed: "Embed",
+                table: "Table",
+                mermaid: "Mermaid Diagram",
+                raw: "Raw HTML",
+              },
+            },
           },
         });
 
         await editor.isReady;
         editorRef.current = editor;
+        setIsReady(true);
 
-        new DragDrop(editor);
-
-        const undo = new Undo({ editor });
-        undo.initialize(await editor.save());
-
+        // Configure Mermaid
         MermaidTool.config({ theme: "neutral" });
       } catch (error) {
         console.error("Failed to load editor:", error);
@@ -227,90 +260,25 @@ const BlogEditor = () => {
     loadEditor();
 
     return () => {
-      const cleanup = async () => {
-        if (editorRef.current && editorRef.current.destroy) {
-          try {
-            await editorRef.current.destroy();
-            editorRef.current = undefined;
-          } catch (e) {
-            console.error("Editor cleanup failed:", e);
-          }
+      if (editorRef.current && editorRef.current.destroy) {
+        try {
+          editorRef.current.destroy();
+          editorRef.current = null;
+          setIsReady(false);
+        } catch (e) {
+          console.error("Editor cleanup failed:", e);
         }
-      };
-
-      cleanup();
+      }
     };
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <style jsx global>{`
-        .codex-editor__redactor {
-          padding-bottom: 120px !important;
-        }
-
-        .ce-block__content {
-          max-width: 100%;
-          margin: 0;
-        }
-
-        .ce-toolbar__content {
-          max-width: 100%;
-          margin: 0;
-        }
-
-        .ce-code__textarea {
-          min-height: 200px;
-          font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas",
-            "source-code-pro", monospace;
-        }
-
-        .ce-header {
-          padding-top: 0.5em;
-          padding-bottom: 0.1em;
-        }
-
-        .cdx-alert {
-          padding: 1rem;
-          margin: 1rem 0;
-          border-radius: 0.375rem;
-        }
-
-        .cdx-alert--info {
-          background-color: #e0f2fe;
-          border: 1px solid #7dd3fc;
-        }
-
-        .cdx-alert--warning {
-          background-color: #fef9c3;
-          border: 1px solid #fde047;
-        }
-
-        /* Title styling */
-        .ce-title {
-          margin-bottom: 1rem;
-        }
-
-        /* Mermaid styling */
-        .ce-mermaid {
-          padding: 1rem 0;
-        }
-
-        /* Raw HTML block styling */
-        .ce-rawtool__textarea {
-          min-height: 200px;
-          font-family: monospace;
-          background: #f8fafc;
-          padding: 1rem;
-          border-radius: 0.375rem;
-        }
-      `}</style>
+    <div className="w-full h-full mx-auto">
       <div ref={holderRef} className="prose prose-lg max-w-none" />
     </div>
   );
 };
 
-// Export as dynamic component with SSR disabled
 export default dynamic(() => Promise.resolve(BlogEditor), {
   ssr: false,
 });
