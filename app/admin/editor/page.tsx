@@ -1,9 +1,10 @@
 "use client";
-import React, { KeyboardEvent, useState } from "react";
+import React, { KeyboardEvent, useEffect, useState } from "react";
 import BlogEditor from "@/components/admin/BlogEditor";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { FolderIcon, ImageIcon, Tag, X } from "lucide-react";
+import { FolderIcon, ImageIcon, Plus, Tag, X } from "lucide-react";
 import type { OutputData } from "@editorjs/editorjs";
+import { Category } from "@/types/blog";
 
 const WritePage = () => {
   const [title, setTitle] = useState("");
@@ -13,6 +14,47 @@ const WritePage = () => {
   const [inputValue, setInputValue] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [featuredImage, setFeaturedImage] = useState<string>("");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [newCategory, setNewCategory] = useState("");
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("/api/categories");
+      const data = await response.json();
+      if (data.success) {
+        setCategories(data.categories);
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategory.trim()) return;
+
+    try {
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: newCategory.trim() }),
+      });
+
+      if (response.ok) {
+        await fetchCategories();
+        setNewCategory("");
+        setIsAddingCategory(false);
+      }
+    } catch (error) {
+      console.error("Failed to add category:", error);
+    }
+  };
 
   const handleEditorChange = (data: OutputData) => {
     setContent(data);
@@ -198,17 +240,77 @@ const WritePage = () => {
           <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
             <FolderIcon className="w-4 h-4" /> Categories
           </h3>
-          <select
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="">Select a category</option>
-            <option value="technology">Technology</option>
-            <option value="lifestyle">Lifestyle</option>
-            <option value="travel">Travel</option>
-            <option value="food">Food</option>
-          </select>
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2 min-h-[32px] border rounded-md p-1.5 bg-white focus-within:ring-1 focus-within:ring-black focus-within:border-black">
+              {isAddingCategory ? (
+                <div className="flex-1 flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleAddCategory();
+                      } else if (e.key === "Escape") {
+                        setIsAddingCategory(false);
+                        setNewCategory("");
+                      }
+                    }}
+                    placeholder="New category name..."
+                    className="flex-1 border-0 focus:outline-none focus:ring-0 text-sm"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => {
+                      setIsAddingCategory(false);
+                      setNewCategory("");
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {category && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200">
+                      {category}
+                      <button
+                        type="button"
+                        onClick={() => setCategory("")}
+                        className="group rounded-sm"
+                      >
+                        <X className="w-3 h-3 text-gray-400 group-hover:text-gray-600" />
+                      </button>
+                    </span>
+                  )}
+                  {!category && (
+                    <div className="flex-1 flex items-center justify-between">
+                      <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full border-0 focus:outline-none focus:ring-0 text-sm bg-transparent"
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map((cat) => (
+                          <option key={cat._id} value={cat.slug}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => setIsAddingCategory(true)}
+                        className="text-gray-400 hover:text-gray-600"
+                        title="Add new category"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="p-4 border-b border-gray-200">
