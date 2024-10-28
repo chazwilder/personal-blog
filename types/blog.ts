@@ -1,3 +1,11 @@
+export interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export interface BlogPost {
   _id?: string;
   title: string;
