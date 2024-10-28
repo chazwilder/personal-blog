@@ -4,6 +4,9 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import type { BlockToolConstructable, OutputData } from "@editorjs/editorjs";
 
+// Import the upload handler
+import { uploadFile } from "./UploadHandler";
+
 type HeaderConfig = {
   levels: number[];
   defaultLevel: number;
@@ -49,6 +52,12 @@ type AttachesConfig = {
   endpoint: string;
   buttonText?: string;
   errorMessage?: string;
+  uploader?: {
+    uploadByFile(file: File): Promise<{
+      success: number;
+      file: { url: string; name: string; size: number };
+    }>;
+  };
 };
 
 interface ToolConstructable {
@@ -160,6 +169,28 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
               endpoints: {
                 byFile: "/api/upload",
                 byUrl: "/api/fetch-image",
+                captionPlaceholder: false,
+              },
+              uploader: {
+                async uploadByFile(file: File) {
+                  try {
+                    const url = await uploadFile(file);
+                    return {
+                      success: 1,
+                      file: {
+                        url,
+                      },
+                    };
+                  } catch (error) {
+                    console.error("Image upload failed:", error);
+                    return {
+                      success: 0,
+                      file: {
+                        url: "",
+                      },
+                    };
+                  }
+                },
               },
             },
           },
@@ -171,6 +202,31 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
             class: Attaches,
             config: {
               endpoint: "/api/upload",
+              uploader: {
+                async uploadByFile(file: File) {
+                  try {
+                    const url = await uploadFile(file);
+                    return {
+                      success: 1,
+                      file: {
+                        url,
+                        name: file.name,
+                        size: file.size,
+                      },
+                    };
+                  } catch (error) {
+                    console.error("File upload failed:", error);
+                    return {
+                      success: 0,
+                      file: {
+                        url: "",
+                        name: file.name,
+                        size: file.size,
+                      },
+                    };
+                  }
+                },
+              },
               buttonText: "Upload a file",
             },
           },

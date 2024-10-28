@@ -190,14 +190,19 @@ const WritePage = () => {
   return (
     <div className="bg-white flex flex-row h-full flex-grow">
       <main className="flex-1 overflow-y-auto bg-gray-50">
-        <div className="border-b border-gray-200 bg-white p-2">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Post Title"
-            className="w-full text-4xl font-bold p-2 pl-8 bg-transparent border-none focus:outline-none focus:ring-0 placeholder-gray-400"
-          />
+        <div className="border-b border-gray-200 bg-white p-2 flex flex-row">
+          <div className="w-auto flex flex-nowrap text-3xl p-2 pl-8 italic">
+            Post Title:
+          </div>
+          <div className="w-1/2 flex flex-row">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Post Title"
+              className="w-full text-4xl font-bold p-2 pl-8 bg-transparent border-none focus:outline-none focus:ring-0 placeholder-gray-400"
+            />
+          </div>
         </div>
         <div className="w-11/12 mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-sm p-6">
