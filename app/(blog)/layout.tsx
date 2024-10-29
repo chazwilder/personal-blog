@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 
 export default function BlogLayout({
   children,
@@ -7,8 +8,10 @@ export default function BlogLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col w-full">
-      <NavBar />
-      <main className="flex-1">{children}</main>
+      <AuroraBackground>
+        <NavBar />
+        <main className="flex-1">{children}</main>
+      </AuroraBackground>
     </div>
   );
 }

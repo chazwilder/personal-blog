@@ -18,6 +18,10 @@ const config: Config = {
         xs: "475px",
       },
       colors: {
+        main: {
+          "100": "#b8ff34",
+          DEFAULT: "#b8ff34",
+        },
         primary: {
           "100": "#FFE8F0",
           DEFAULT: "hsl(var(--primary))",
