@@ -8,7 +8,9 @@ const NavBar = () => {
     <div className="w-full h-32 border-b border-gray-300 items-center flex flex-row bg-white z-50">
       <div className="w-2/3 mx-auto items-center flex flex-row">
         <div className="flex flex-row p-4">
-          <Image src="/logo.png" width="250" height="100" alt="logo" />
+          <Link href="/">
+            <Image src="/logo.png" width="250" height="100" alt="logo" />
+          </Link>
         </div>
         <div className="ml-auto items-center flex flex-row"></div>
         <div className="flex flex-row">
