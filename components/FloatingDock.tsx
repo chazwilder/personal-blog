@@ -13,7 +13,7 @@ export function FloatingDockComponent() {
     {
       title: "Home",
       icon: (
-        <IconHome className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <IconHome className="h-full w-full text-neutral-500 dark:text-black" />
       ),
       href: "/",
     },
@@ -21,28 +21,28 @@ export function FloatingDockComponent() {
     {
       title: "About",
       icon: (
-        <IconTerminal2 className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <IconTerminal2 className="h-full w-full text-neutral-500 dark:text-black" />
       ),
       href: "/about",
     },
     {
       title: "Blog",
       icon: (
-        <IconArticle className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <IconArticle className="h-full w-full text-neutral-500 dark:text-black" />
       ),
       href: "/blog",
     },
     {
       title: "Contact",
       icon: (
-        <IconAddressBook className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <IconAddressBook className="h-full w-full text-neutral-500 dark:text-black" />
       ),
       href: "/contact",
     },
     {
       title: "LinkedIn",
       icon: (
-        <IconBrandLinkedin className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <IconBrandLinkedin className="h-full w-full text-neutral-500 dark:text-black" />
       ),
       href: "https://www.linkedin.com/in/chaz-wilder/",
     },
