@@ -1,23 +1,22 @@
-import type { Metadata } from "next";
-import "../globals.css";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { ClerkProvider } from "@clerk/nextjs";
 import NavBar from "@/components/NavBar";
 
-export const metadata: Metadata = {
-  title: "The Curious Coder",
-  description: "Driven By Curiosity",
-};
-
-export default function RootLayout({
+export default async function AdminLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   return (
     <ClerkProvider>
-      <div
-        className={`antialiased w-full min-h-screen h-full flex flex-1 flex-col z-50 text-black`}
-      >
+      <div className="antialiased w-full min-h-screen h-full flex flex-1 flex-col z-50 text-black">
         <NavBar />
         {children}
       </div>
