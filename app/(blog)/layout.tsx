@@ -10,7 +10,9 @@ export default function BlogLayout({
     <div className="flex min-h-screen flex-col w-full">
       <AuroraBackground>
         <NavBar />
-        <main className="flex-1">{children}</main>
+        <main className="flex flex-col w-full h-full flex-1 flex-grow items-center justify-center">
+          {children}
+        </main>
       </AuroraBackground>
     </div>
   );
