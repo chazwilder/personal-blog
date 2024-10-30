@@ -15,4 +15,8 @@ export const NAV_LINK = [
     name: "Contact",
     href: "/contact",
   },
+  {
+    name: "Dashboard",
+    href: "/admin/dashboard",
+  },
 ];
