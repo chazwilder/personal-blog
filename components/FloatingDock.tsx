@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import {
@@ -5,11 +6,16 @@ import {
   IconArticle,
   IconBrandLinkedin,
   IconHome,
+  IconLayoutDashboard,
   IconTerminal2,
 } from "@tabler/icons-react";
+import { useAuth } from "@clerk/nextjs";
 
 export function FloatingDockComponent() {
-  const links = [
+  const { isSignedIn } = useAuth();
+
+  // Base links that are always shown
+  const baseLinks = [
     {
       title: "Home",
       icon: (
@@ -17,7 +23,6 @@ export function FloatingDockComponent() {
       ),
       href: "/",
     },
-
     {
       title: "About",
       icon: (
@@ -39,14 +44,31 @@ export function FloatingDockComponent() {
       ),
       href: "/contact",
     },
-    {
-      title: "LinkedIn",
-      icon: (
-        <IconBrandLinkedin className="h-full w-full text-neutral-500 dark:text-black" />
-      ),
-      href: "https://www.linkedin.com/in/chaz-wilder/",
-    },
   ];
+
+  // Admin link shown only when logged in
+  const adminLink = {
+    title: "Dashboard",
+    icon: (
+      <IconLayoutDashboard className="h-full w-full text-neutral-500 dark:text-black" />
+    ),
+    href: "/admin/dashboard",
+  };
+
+  // LinkedIn link shown only when not logged in
+  const linkedInLink = {
+    title: "LinkedIn",
+    icon: (
+      <IconBrandLinkedin className="h-full w-full text-neutral-500 dark:text-black" />
+    ),
+    href: "https://www.linkedin.com/in/chaz-wilder/",
+  };
+
+  // Combine links based on auth status
+  const links = isSignedIn
+    ? [...baseLinks, adminLink]
+    : [...baseLinks, linkedInLink];
+
   return (
     <div className="flex items-center justify-center w-full mt-auto fixed bottom-4 z-[999]">
       <FloatingDock mobileClassName="translate-y-20" items={links} />
