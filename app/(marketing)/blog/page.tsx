@@ -83,7 +83,7 @@ const BlogPage = () => {
             transition={{ delay: index * 0.1 }}
           >
             <Link href={`/blog/${post.slug}`}>
-              <article className="group relative bg-neutral-900 rounded-lg p-6 hover:bg-neutral-800 transition-colors">
+              <article className="group relative bg-neutral-700 rounded-lg p-6 hover:bg-neutral-800 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="space-y-3">
                     <h2 className="text-2xl font-bold text-white group-hover:text-main transition-colors">
