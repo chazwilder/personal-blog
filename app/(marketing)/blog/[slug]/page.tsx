@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { BlogPost } from "@/types/blog";
+import Image from "next/image";
 
 const renderBlock = (block: any) => {
   switch (block.type) {
@@ -23,9 +24,11 @@ const renderBlock = (block: any) => {
     case "image":
       return (
         <div className="my-6">
-          <img
+          <Image
             src={block.data.file?.url || block.data.url}
             alt={block.data.caption}
+            width={1000}
+            height={1000}
             className="rounded-lg max-w-full mx-auto"
           />
           {block.data.caption && (
@@ -141,9 +144,11 @@ const BlogPostPage = () => {
       <header className="mb-12">
         {post.featuredImage && (
           <div className="aspect-video relative mb-8">
-            <img
+            <Image
               src={post.featuredImage}
               alt={post.title}
+              width={1000}
+              height={1000}
               className="rounded-lg object-cover w-full h-full"
             />
           </div>

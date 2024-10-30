@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { BlogPost } from "@/types/blog";
+import Image from "next/image";
 
 const BlogPage = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -119,9 +120,11 @@ const BlogPage = () => {
                   </div>
                   {post.featuredImage && (
                     <div className="hidden md:block w-48 h-32 rounded-lg overflow-hidden">
-                      <img
+                      <Image
                         src={post.featuredImage}
                         alt={post.title}
+                        width={1000}
+                        height={1000}
                         className="w-full h-full object-cover"
                       />
                     </div>
