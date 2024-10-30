@@ -41,10 +41,8 @@ const renderBlock = (block: any) => {
       return (
         <ListTag className="list-inside my-4 text-neutral-300">
           {block.data.items.map((item: string, index: number) => (
-            <li key={index} className="my-2">
-              {block.data.style === "ordered"
-                ? `${index + 1}. ${item}`
-                : `• ${item}`}
+            <li key={index} className="my-2 ml-4">
+              <span>{item}</span>
             </li>
           ))}
         </ListTag>

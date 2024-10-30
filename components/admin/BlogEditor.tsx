@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import type { BlockToolConstructable, OutputData } from "@editorjs/editorjs";
 
-// Import the upload handler
 import { uploadFile } from "./UploadHandler";
 
 type HeaderConfig = {
@@ -88,6 +87,28 @@ interface BlogEditorProps {
   initialData?: OutputData | null;
 }
 
+const lucideToSvg = (Icon: any) => {
+  const defaultAttributes = {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "24",
+    height: "24",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+  };
+
+  // Get the path/paths from the icon
+  const paths = Icon.toString();
+
+  // Create SVG string
+  return `<svg ${Object.entries(defaultAttributes)
+    .map(([key, value]) => `${key}="${value}"`)
+    .join(" ")}>${paths}</svg>`;
+};
+
 const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
   const editorRef = useRef<any>(null);
   const holderRef = useRef<HTMLDivElement>(null);
@@ -139,6 +160,38 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
               placeholder: "Heading",
             },
             shortcut: "CMD+SHIFT+H",
+            toolbox: [
+              {
+                title: "Heading 1",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heading-1"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="m17 12 3-2v8"/></svg>',
+                data: { level: 1 },
+              },
+              {
+                title: "Heading 2",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heading-2"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"/></svg>',
+                data: { level: 2 },
+              },
+              {
+                title: "Heading 3",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heading-3"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5a2 2 0 0 1-2 2"/><path d="M17 17.5c2 1.5 4 .3 4-1.5a2 2 0 0 0-2-2"/></svg>',
+                data: { level: 3 },
+              },
+              {
+                title: "Heading 4",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heading-4"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17 10v4h4"/><path d="M21 10v8"/></svg>',
+                data: { level: 4 },
+              },
+              {
+                title: "Heading 5",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heading-5"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17 13v-3h4"/><path d="M17 17.7c.4.2.8.3 1.3.3 1.5 0 2.7-1.1 2.7-2.5S19.8 13 18.3 13H17"/></svg>',
+                data: { level: 5 },
+              },
+              {
+                title: "Heading 6",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heading-6"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><circle cx="19" cy="16" r="2"/><path d="M20 10c-2 2-3 3.5-3 6"/></svg>',
+                data: { level: 6 },
+              },
+            ],
           },
           paragraph: {
             inlineToolbar: true,
@@ -149,6 +202,18 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
             config: {
               defaultStyle: "unordered",
             },
+            toolbox: [
+              {
+                title: "Bullet List",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg>',
+                data: { style: "unordered" },
+              },
+              {
+                title: "Numbered List",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-ordered"><path d="M10 12h11"/><path d="M10 18h11"/><path d="M10 6h11"/><path d="M4 10h2"/><path d="M4 6h1v4"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>',
+                data: { style: "ordered" },
+              },
+            ],
           },
           checklist: {
             class: Checklist,
@@ -297,6 +362,14 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
                 table: "Table",
                 mermaid: "Mermaid Diagram",
                 raw: "Raw HTML",
+              },
+              ui: {
+                blockTunes: {
+                  toggler: {
+                    "Click to tune": "Click to tune",
+                    "or drag to move": "or drag to move",
+                  },
+                },
               },
             },
           },

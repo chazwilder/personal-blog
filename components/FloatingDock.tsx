@@ -12,7 +12,13 @@ import {
 import { useAuth } from "@clerk/nextjs";
 
 export function FloatingDockComponent() {
-  const { isSignedIn } = useAuth();
+  // Add isLoading check
+  const { isSignedIn, isLoaded } = useAuth();
+
+  // Return null or loading state while auth is loading
+  if (!isLoaded) {
+    return null;
+  }
 
   // Base links that are always shown
   const baseLinks = [

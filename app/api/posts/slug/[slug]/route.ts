@@ -6,11 +6,13 @@ export async function GET(
   { params }: { params: { slug: string } },
 ) {
   try {
+    const { slug } = await params;
+
     const client = await clientPromise;
     const db = client.db("blog");
 
     const post = await db.collection("posts").findOne({
-      slug: params.slug,
+      slug: slug,
       status: "published",
     });
 
