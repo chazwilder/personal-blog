@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
-import { BlogPostCreate } from "@/types/blog";
 import { ObjectId } from "mongodb";
 
-function getSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
-}
+type RouteParams = {
+  params: {
+    id: string;
+  };
+};
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } },
-) {
+export async function GET(req: Request, { params }: RouteParams) {
+  if (!params?.id) {
+    return NextResponse.json({ error: "No ID provided" }, { status: 400 });
+  }
+
   try {
     const client = await clientPromise;
     const db = client.db("blog");
@@ -36,35 +35,21 @@ export async function GET(
   }
 }
 
-// PUT /api/posts/[id] - Update post
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } },
-) {
+export async function PUT(req: Request, { params }: RouteParams) {
+  if (!params?.id) {
+    return NextResponse.json({ error: "No ID provided" }, { status: 400 });
+  }
+
   try {
     const body = await req.json();
     const client = await clientPromise;
     const db = client.db("blog");
 
-    const updateData: Partial<BlogPostCreate> = {
-      title: body.title,
-      content: body.content,
-      featuredImage: body.featuredImage,
-      category: body.category,
-      tags: body.tags,
-      status: body.status,
-    };
-
-    // Only update slug if title is being updated
-    if (body.title) {
-      updateData.slug = getSlug(body.title);
-    }
-
     const result = await db.collection("posts").updateOne(
       { _id: new ObjectId(params.id) },
       {
         $set: {
-          ...updateData,
+          ...body,
           updatedAt: new Date(),
         },
       },
@@ -84,11 +69,11 @@ export async function PUT(
   }
 }
 
-// DELETE /api/posts/[id] - Delete post
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(req: Request, { params }: RouteParams) {
+  if (!params?.id) {
+    return NextResponse.json({ error: "No ID provided" }, { status: 400 });
+  }
+
   try {
     const client = await clientPromise;
     const db = client.db("blog");

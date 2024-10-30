@@ -6,14 +6,14 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
+        protocol: "http",
+        hostname: "**",
       },
       {
-        protocol: 'http',
-        hostname: '127.0.0.1',
-      }
-    ]
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -21,10 +21,10 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  output: 'standalone',
+  output: "standalone",
   outputFileTracingIncludes: {
-    '/public/uploads/**/*': true,
-  }
+    "/app/public/uploads": ["**/*"],
+  },
 };
 
 export default withSentryConfig(nextConfig, {

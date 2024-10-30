@@ -15,7 +15,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <ClerkProvider>
+    <ClerkProvider dynamic>
       <div className="antialiased w-full min-h-screen h-full flex flex-1 flex-col z-50 text-black">
         {children}
       </div>

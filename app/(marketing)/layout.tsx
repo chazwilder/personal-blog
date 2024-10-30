@@ -10,7 +10,7 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider dynamic>
       <AuroraBackground>
         <div className="flex min-h-screen flex-col w-full justify-center">
           <div className="absolute top-0 left-0 z-[999]">
