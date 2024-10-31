@@ -6,7 +6,7 @@ import { Inter } from "next/font/google";
 // If loading a variable font, you don't need to specify the font weight
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
-  title: "The Curious Coder",
+  title: "The Curious Coder | Full Stack Problem Solver",
   description: "Driven By Curiosity",
 };
 

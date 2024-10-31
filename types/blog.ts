@@ -9,7 +9,15 @@ export interface Category {
 export interface BlogPost {
   _id?: string;
   title: string;
-  content: any;
+  content: {
+    blocks: Array<{
+      type: string;
+      data: {
+        text?: string;
+        [key: string]: any;
+      };
+    }>;
+  };
   featuredImage?: string;
   category: string;
   tags: string[];
