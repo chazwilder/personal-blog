@@ -1,5 +1,3 @@
-import { Calendar, Code, Server, Terminal } from "lucide-react";
-
 const About = () => {
   return (
     <section className="relative min-h-screen max-w-4xl mx-auto dark:text-white p-4">
@@ -28,7 +26,6 @@ const About = () => {
         {/* Journey */}
         <div className="space-y-6">
           <h2 className="text-main text-4xl font-bold flex items-center gap-3">
-            <Calendar className="h-8 w-8" />
             The Unconventional Path
           </h2>
           <p className="text-xl leading-relaxed">
@@ -45,7 +42,6 @@ const About = () => {
         {/* Technical Expertise */}
         <div className="space-y-8">
           <h2 className="text-main text-4xl font-bold flex items-center gap-3">
-            <Code className="h-8 w-8" />
             Technical Arsenal
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -73,7 +69,6 @@ const About = () => {
         {/* Impact */}
         <div className="space-y-6">
           <h2 className="text-main text-4xl font-bold flex items-center gap-3">
-            <Terminal className="h-8 w-8" />
             Real-World Impact
           </h2>
           <p className="text-xl leading-relaxed">
@@ -99,7 +94,6 @@ const About = () => {
         {/* Current Focus */}
         <div className="space-y-8 pb-8">
           <h2 className="text-main text-4xl font-bold flex items-center gap-3">
-            <Server className="h-8 w-8" />
             Current Focus
           </h2>
           <p className="text-xl leading-relaxed">
