@@ -99,45 +99,51 @@ export default function ModernBlogEditor({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
       {/* Main Editor Section */}
       <div className="flex-1 flex flex-col">
         {/* Top Bar */}
-        <div className="h-16 bg-white border-b flex items-center px-6 justify-between">
+        <div className="h-auto sm:h-16 bg-white border-b flex flex-col sm:flex-row items-start sm:items-center p-4 sm:px-6 gap-4 sm:gap-0">
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Post Title"
-            className="text-2xl font-medium bg-transparent border-none focus:outline-none flex-1 mr-4"
+            className="text-xl sm:text-2xl font-medium bg-transparent border-none focus:outline-none w-full sm:w-auto flex-1 mr-0 sm:mr-4"
           />
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
             <button
               onClick={() => handleSave("draft")}
               disabled={isSaving}
-              className="px-4 py-2 flex items-center gap-2 text-sm bg-white border rounded-lg hover:bg-gray-50"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-2 text-sm bg-white border rounded-lg hover:bg-gray-50"
             >
               <Save className="w-4 h-4" />
-              {isSaving
-                ? "Saving..."
-                : isEditMode
-                  ? "Save Changes"
-                  : "Save Draft"}
+              <span className="hidden sm:inline">
+                {isSaving
+                  ? "Saving..."
+                  : isEditMode
+                    ? "Save Changes"
+                    : "Save Draft"}
+              </span>
+              <span className="sm:hidden">Save</span>
             </button>
             <button
               onClick={() => handleSave("published")}
               disabled={isSaving}
-              className="px-4 py-2 flex items-center gap-2 text-sm bg-main text-black rounded-lg hover:bg-main/90"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-2 text-sm bg-main text-black rounded-lg hover:bg-main/90"
             >
               <Send className="w-4 h-4" />
-              {isSaving ? "Publishing..." : "Publish"}
+              <span className="hidden sm:inline">
+                {isSaving ? "Publishing..." : "Publish"}
+              </span>
+              <span className="sm:hidden">Publish</span>
             </button>
           </div>
         </div>
 
         {/* Editor Area */}
-        <div className="flex-1 overflow-auto px-6 py-8">
-          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm">
+        <div className="flex-1 overflow-auto px-2 sm:px-6 py-4 sm:py-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-4">
             <BlogEditor
               onChange={setContent}
               initialData={content}
@@ -147,9 +153,9 @@ export default function ModernBlogEditor({
         </div>
       </div>
 
-      {/* Sidebar */}
-      <div className="w-80 bg-white border-l flex flex-col">
-        <div className="p-6 space-y-8">
+      {/* Sidebar - Convert to bottom sheet on mobile */}
+      <div className="lg:w-80 bg-white border-t lg:border-l flex flex-col">
+        <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
           {/* Featured Image */}
           <div>
             <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">

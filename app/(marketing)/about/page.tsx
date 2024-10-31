@@ -2,7 +2,7 @@ import { Calendar, Code, Server, Terminal } from "lucide-react";
 
 const About = () => {
   return (
-    <section className="relative min-h-screen max-w-4xl mx-auto dark:text-white">
+    <section className="relative min-h-screen max-w-4xl mx-auto dark:text-white p-4">
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-20">
         <div className="max-w-4xl mx-auto space-y-6">

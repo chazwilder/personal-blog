@@ -16,7 +16,7 @@ const renderBlock = (block: any) => {
 
     case "paragraph":
       return (
-        <p className="text-neutral-300 my-4 leading-relaxed">
+        <p className="text-neutral-300 my-4 leading-relaxed text-lg">
           {block.data.text}
         </p>
       );
@@ -42,9 +42,9 @@ const renderBlock = (block: any) => {
     case "list":
       const ListTag = block.data.style === "ordered" ? "ol" : "ul";
       return (
-        <ListTag className="list-inside my-4 text-neutral-300">
+        <ListTag className="list-inside my-4 text-neutral-300 text-lg">
           {block.data.items.map((item: string, index: number) => (
-            <li key={index} className="my-2 ml-4">
+            <li key={index} className="py-2 pl-1">
               <span>{item}</span>
             </li>
           ))}
@@ -139,7 +139,7 @@ const BlogPostPage = () => {
   }
 
   return (
-    <article className="max-w-3xl mx-auto px-4 py-12 z-[999]">
+    <article className="flex flex-col max-w-3xl mx-auto px-4 py-12 z-[999] w-full h-full">
       {/* Header Section */}
       <header className="mb-12">
         {post.featuredImage && (
@@ -182,7 +182,7 @@ const BlogPostPage = () => {
       </header>
 
       {/* Content Section */}
-      <div className="prose prose-invert max-w-none">
+      <div className="prose prose-invert space-y-2">
         {post.content.blocks?.map((block: any, index: number) => (
           <div key={index}>{renderBlock(block)}</div>
         ))}

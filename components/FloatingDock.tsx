@@ -76,8 +76,8 @@ export function FloatingDockComponent() {
     : [...baseLinks, linkedInLink];
 
   return (
-    <div className="flex items-center justify-center w-full mt-auto fixed bottom-4 z-[999]">
-      <FloatingDock mobileClassName="translate-y-20" items={links} />
+    <div className="flex items-center justify-center w-full mt-auto fixed bottom-6 z-[999]">
+      <FloatingDock mobileClassName="translate-y-20 " items={links} />
     </div>
   );
 }

@@ -46,7 +46,7 @@ const BlogPage = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col w-full h-full">
+    <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col w-full h-full z-[999]">
       {/* Tags Filter */}
       <div className="flex items-center gap-2 mb-12 overflow-x-auto pb-4">
         <button
@@ -57,7 +57,7 @@ const BlogPage = () => {
               : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
           }`}
         >
-          all
+          All
         </button>
         {allTags.map((tag) => (
           <button
