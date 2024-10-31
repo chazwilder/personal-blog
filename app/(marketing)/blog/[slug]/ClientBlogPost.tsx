@@ -2,7 +2,7 @@
 import React from "react";
 import { BlogPost } from "@/types/blog";
 import Image from "next/image";
-import Link from "next/link";
+import DOMPurify from "isomorphic-dompurify";
 
 interface ClientBlogPostProps {
   initialPost: BlogPost;
@@ -19,10 +19,12 @@ const renderBlock = (block: any) => {
       );
 
     case "paragraph":
+      const sanitizedHtml = DOMPurify.sanitize(block.data.text);
       return (
-        <p className="text-neutral-300 my-4 leading-relaxed text-lg">
-          {block.data.text}
-        </p>
+        <p
+          className="text-neutral-300 my-4 leading-relaxed text-lg [&_a]:text-main [&_a]:hover:underline"
+          dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+        />
       );
 
     case "image":
@@ -76,23 +78,6 @@ const renderBlock = (block: any) => {
 
     case "delimiter":
       return <hr className="my-8 border-neutral-800" />;
-
-    case "link":
-      const isExternal = block.data.link.startsWith("http");
-      return isExternal ? (
-        <a
-          href={block.data.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-main hover:underline"
-        >
-          {block.data.text || block.data.link}
-        </a>
-      ) : (
-        <Link href={block.data.link} className="text-main hover:underline">
-          {block.data.text || block.data.link}
-        </Link>
-      );
 
     case "table":
       return (
