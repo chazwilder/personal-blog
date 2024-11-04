@@ -1,28 +1,22 @@
-import { MongoClient } from "mongodb";
+// lib/mongodb.ts
+import { PrismaClient } from "@prisma/client";
 
-if (!process.env.MONGO_URL) {
-  throw new Error("Please add your Mongo URI to .env.local");
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
 }
 
-const uri = process.env.MONGO_URL;
-const options = {};
+let prisma: PrismaClient;
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === "development") {
-  const globalWithMongo = global as typeof globalThis & {
-    _mongoClientPromise?: Promise<MongoClient>;
-  };
-
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
-  }
-  clientPromise = globalWithMongo._mongoClientPromise;
+if (process.env.NODE_ENV === "production") {
+  prisma = new PrismaClient();
 } else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  if (!global.prisma) {
+    global.prisma = new PrismaClient();
+  }
+  prisma = global.prisma;
 }
 
-export default clientPromise;
+export const db = prisma;
+
+export type * from "@prisma/client";

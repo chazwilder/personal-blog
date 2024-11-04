@@ -79,7 +79,7 @@ export default async function BlogPostPage({
             __html: JSON.stringify(generateBlogJsonLd(post)),
           }}
         />
-        <ClientBlogPost initialPost={post} />
+        <ClientBlogPost post={post} />
       </>
     );
   } catch (error) {
