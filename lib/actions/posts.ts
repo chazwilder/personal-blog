@@ -1,155 +1,76 @@
 "use server";
 
-import { db } from "@/lib/mongodb";
+import { Post } from "@/models";
+import dbConnect from "@/lib/mongodb";
 import { revalidatePath } from "next/cache";
-import { PostStatus, PostVisibility, Prisma } from "@prisma/client";
-import { z } from "zod";
+import { withErrorHandling } from "@/lib/utils/mongoose";
+import type { PostFilter, BlogPost } from "@/types/blog";
 
-const PostCreateSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  content: z.any(),
-  excerpt: z.string().optional(),
-  categoryId: z.string(),
-  tagIds: z.array(z.string()),
-  featuredImage: z
-    .object({
-      url: z.string(),
-      alt: z.string(),
-      caption: z.string().optional(),
-    })
-    .optional(),
-  status: z.nativeEnum(PostStatus).default("DRAFT"),
-  visibility: z.nativeEnum(PostVisibility).default("PUBLIC"),
-  password: z.string().optional(),
-  seo: z
-    .object({
-      metaTitle: z.string().optional(),
-      metaDescription: z.string().optional(),
-      canonicalUrl: z.string().url().optional(),
-      focusKeywords: z.array(z.string()).optional(),
-      ogImage: z.string().url().optional(),
-    })
-    .optional(),
-});
-
-type PostCreateInput = z.infer<typeof PostCreateSchema>;
-
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+function serializePost(post: any): BlogPost {
+  return {
+    _id: post._id.toString(),
+    title: post.title,
+    content: post.content,
+    featuredImage: post.featuredImage,
+    category: post.category,
+    tags: post.tags,
+    status: post.status,
+    slug: post.slug,
+    createdAt: post.createdAt.toISOString(),
+    updatedAt: post.updatedAt.toISOString(),
+    author: post.author
+      ? {
+          _id: post.author._id?.toString(),
+          name: post.author.name,
+          avatar: post.author.avatar,
+        }
+      : null,
+  };
 }
 
-export async function createPost(
-  data: PostCreateInput,
-  authorId: string,
-): Promise<{ success: boolean; post?: any; error?: any }> {
-  try {
-    const validated = PostCreateSchema.parse(data);
+export async function getPosts(filter: PostFilter = {}) {
+  await dbConnect();
 
-    const prismaData: Prisma.PostCreateInput = {
-      title: validated.title,
-      slug: generateSlug(validated.title),
-      content: validated.content,
-      excerpt: validated.excerpt,
-      status: validated.status,
-      visibility: validated.visibility,
-      password: validated.password,
-      featuredImage: validated.featuredImage,
-      seo: validated.seo,
-      author: {
-        connect: { id: authorId },
-      },
-      category: {
-        connect: { id: validated.categoryId },
-      },
-      tags: {
-        connect: validated.tagIds.map((id) => ({ id })),
-      },
-    };
+  const result = await withErrorHandling(Post, "fetch-posts", async () => {
+    const query: any = {};
 
-    const post = await db.post.create({
-      data: prismaData,
-      include: {
-        author: {
-          select: {
-            name: true,
-            avatar: true,
-          },
-        },
-        category: true,
-        tags: true,
-      },
-    });
-
-    revalidatePath("/blog");
-    return { success: true, post };
-  } catch (error) {
-    console.error("Failed to create post:", error);
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors };
+    if (filter.status && filter.status !== "all") {
+      query.status = filter.status;
     }
-    return { success: false, error: "Failed to create post" };
-  }
+
+    if (filter.searchTerm) {
+      query.title = {
+        $regex: filter.searchTerm,
+        $options: "i",
+      };
+    }
+
+    const sort: any = {};
+    if (filter.sortBy === "title") {
+      sort.title = filter.sortOrder === "desc" ? -1 : 1;
+    } else {
+      sort.updatedAt = filter.sortOrder === "desc" ? -1 : 1;
+    }
+
+    const posts = await Post.find(query)
+      .sort(sort)
+      .populate("author", "name avatar")
+      .lean();
+
+    const serializedPosts = posts.map(serializePost);
+
+    return serializedPosts;
+  });
+
+  return result;
 }
 
-export async function getPosts({
-  status,
-  visibility,
-  page = 1,
-  limit = 10,
-  categorySlug,
-  tagSlug,
-}: {
-  status?: PostStatus;
-  visibility?: PostVisibility;
-  page?: number;
-  limit?: number;
-  categorySlug?: string;
-  tagSlug?: string;
-} = {}) {
-  try {
-    const skip = (page - 1) * limit;
+export async function deletePost(postId: string) {
+  await dbConnect();
 
-    const where: Prisma.PostWhereInput = {
-      ...(status && { status }),
-      ...(visibility && { visibility }),
-      ...(categorySlug && { category: { slug: categorySlug } }),
-      ...(tagSlug && { tags: { some: { slug: tagSlug } } }),
-    };
-
-    const [posts, total] = await Promise.all([
-      db.post.findMany({
-        where,
-        include: {
-          author: {
-            select: {
-              name: true,
-              avatar: true,
-            },
-          },
-          category: true,
-          tags: true,
-        },
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limit,
-      }),
-      db.post.count({ where }),
-    ]);
-
-    return {
-      posts,
-      pagination: {
-        total,
-        pages: Math.ceil(total / limit),
-        page,
-        limit,
-      },
-    };
-  } catch (error) {
-    console.error("Failed to fetch posts:", error);
-    throw new Error("Failed to fetch posts");
-  }
+  return await withErrorHandling(Post, "delete", async () => {
+    await Post.findByIdAndDelete(postId);
+    revalidatePath("/admin/dashboard");
+    return true;
+  });
 }

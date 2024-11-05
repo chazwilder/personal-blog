@@ -7,7 +7,7 @@ export interface Category {
 }
 
 export interface BlogPost {
-  _id?: string;
+  _id: string;
   title: string;
   content: {
     blocks: Array<{
@@ -22,10 +22,27 @@ export interface BlogPost {
   category: string;
   tags: string[];
   status: "draft" | "published";
-  createdAt: Date;
-  updatedAt: Date;
   slug: string;
+  createdAt: string;
+  updatedAt: string;
+  author?: {
+    _id: string;
+    name: string;
+    avatar?: string;
+  } | null;
 }
+
+export type PostStatus = "all" | "published" | "draft";
+
+export interface PostFilter {
+  searchTerm?: string;
+  status?: PostStatus;
+  sortBy?: "date" | "title";
+  sortOrder?: "asc" | "desc";
+}
+
+export type PostSortField = "date" | "title";
+export type SortOrder = "asc" | "desc";
 
 export type BlogPostCreate = Omit<
   BlogPost,
@@ -52,28 +69,6 @@ export interface ContentBlock {
     };
     [key: string]: any;
   };
-}
-
-export interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  content: {
-    blocks: ContentBlock[];
-  };
-  excerpt?: string;
-  featuredImage?: FeaturedImage;
-  categoryId?: string;
-  category?: string;
-  tags: string[];
-  status: "PUBLISHED" | "DRAFT";
-  authorId: string;
-  coAuthorIds?: string[];
-  createdAt: Date | string;
-  updatedAt: Date | string;
-  seriesOrder?: number;
-  url?: string;
-  alt?: string;
 }
 
 // types/api.ts
