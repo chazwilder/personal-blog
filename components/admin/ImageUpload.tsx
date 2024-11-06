@@ -3,14 +3,14 @@ import { Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
 
 interface ImageUploadProps {
-  onImageSelect: (imageUrl: string) => void;
-  initialImage?: string;
+  onImageSelect: (imageData: { url: string; imageId: string }) => void;
+  initialImage?: { url: string; imageId?: string };
 }
 
 const ImageUpload = ({ onImageSelect, initialImage }: ImageUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    initialImage || null,
+    initialImage?.url || null,
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +29,7 @@ const ImageUpload = ({ onImageSelect, initialImage }: ImageUploadProps) => {
     }
 
     // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 50 * 1024 * 1024) {
       setError("File size must be less than 10MB");
       setIsUploading(false);
       return;
@@ -52,7 +52,10 @@ const ImageUpload = ({ onImageSelect, initialImage }: ImageUploadProps) => {
 
       if (data.success) {
         setPreviewUrl(data.imageUrl);
-        onImageSelect(data.imageUrl);
+        onImageSelect({
+          url: data.imageUrl,
+          imageId: data.imageId,
+        });
       } else {
         throw new Error(data.error || "Upload failed");
       }
@@ -85,7 +88,7 @@ const ImageUpload = ({ onImageSelect, initialImage }: ImageUploadProps) => {
 
   const removeImage = () => {
     setPreviewUrl(null);
-    onImageSelect("");
+    onImageSelect({ url: "", imageId: "" });
   };
 
   return (
@@ -106,6 +109,7 @@ const ImageUpload = ({ onImageSelect, initialImage }: ImageUploadProps) => {
                 alt="Featured image"
                 fill
                 className="object-cover rounded-md"
+                unoptimized
               />
             </div>
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-md flex items-center justify-center gap-4">

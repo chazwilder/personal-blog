@@ -16,6 +16,7 @@ export interface IBlogPost extends Document {
     url: string;
     alt: string;
     caption?: string;
+    imageId?: string;
   };
   category: Schema.Types.ObjectId;
   tags: Schema.Types.ObjectId[];
@@ -78,6 +79,10 @@ const blogPostSchema = new Schema<IBlogPost>(
       url: String,
       alt: String,
       caption: String,
+      imageId: {
+        type: Schema.Types.ObjectId,
+        ref: "Image",
+      },
     },
     category: {
       type: Schema.Types.ObjectId,

@@ -35,6 +35,7 @@ export interface BlogPost {
   featuredImage?: {
     url: string;
     alt: string;
+    imageId?: string;
   };
   createdAt: string;
   updatedAt: string;

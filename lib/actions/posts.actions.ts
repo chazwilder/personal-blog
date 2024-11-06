@@ -5,6 +5,7 @@ import { Post } from "@/database/post.model";
 import { Category } from "@/database/category.model";
 import { Tag } from "@/database/tag.model";
 import { User } from "@/database/user.model";
+import { Image } from "@/database/image.model";
 import { revalidatePath } from "next/cache";
 import slugify from "slugify";
 import { auth } from "@clerk/nextjs/server";
@@ -16,6 +17,7 @@ export interface PostFormData {
   category: string;
   tags: string[];
   featuredImage?: string;
+  featuredImageId?: string;
   status: "draft" | "published";
 }
 
@@ -36,6 +38,7 @@ export async function getPost(postId: string) {
         category: post.category,
         tags: post.tags,
         featuredImage: post.featuredImage?.url || "",
+        featuredImageId: post.featuredImage?.imageId || "",
       },
     };
   } catch (error) {
@@ -72,6 +75,7 @@ export async function getPosts() {
         slug: tag.slug,
       })),
       featuredImage: post.featuredImage,
+      featuredImageId: post.featuredImage?.imageId,
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString(),
     }));
@@ -110,11 +114,8 @@ export async function createPost(formData: PostFormData) {
     }
 
     const authorId = await getOrCreateUser(userId);
-
     const categoryId = await getOrCreateCategory(formData.category);
-
     const tagIds = await getOrCreateTags(formData.tags);
-
     const slug = slugify(formData.title, { lower: true, strict: true });
 
     const newPost = new Post({
@@ -126,6 +127,7 @@ export async function createPost(formData: PostFormData) {
         ? {
             url: formData.featuredImage,
             alt: formData.title,
+            imageId: formData.featuredImageId,
           }
         : undefined,
       slug,
@@ -177,6 +179,7 @@ export async function updatePost(postId: string, formData: PostFormData) {
           ? {
               url: formData.featuredImage,
               alt: formData.title,
+              imageId: formData.featuredImageId,
             }
           : undefined,
         status: formData.status,
@@ -206,15 +209,12 @@ export async function updatePost(postId: string, formData: PostFormData) {
 export async function createCategory(name: string) {
   try {
     await connectToDatabase();
-
     const newCategory = new Category({
       name,
       slug: slugify(name, { lower: true, strict: true }),
     });
-
     await newCategory.save();
     revalidatePath("/admin/dashboard");
-
     return { success: true, category: newCategory };
   } catch (error) {
     console.error("Error creating category:", error);
@@ -274,11 +274,21 @@ export async function deletePost(postId: string) {
       return { success: false, error: "Unauthorized" };
     }
 
-    const post = await Post.findByIdAndDelete(postId);
+    const post = await Post.findById(postId);
 
     if (!post) {
       return { success: false, error: "Post not found" };
     }
+
+    if (post.featuredImage?.imageId) {
+      try {
+        await Image.findByIdAndDelete(post.featuredImage.imageId);
+      } catch (error) {
+        console.error("Error deleting associated image:", error);
+      }
+    }
+
+    await Post.findByIdAndDelete(postId);
 
     revalidatePath("/admin/dashboard");
     revalidatePath("/blog");
@@ -326,7 +336,8 @@ export async function getPostBySlug(slug: string) {
         name: tag.name,
         slug: tag.slug,
       })),
-      featuredImage: post.featuredImage,
+      featuredImage: post.featuredImage?.url || "",
+      featuredImageId: post.featuredImage?.imageId || "",
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString(),
       author: post.author

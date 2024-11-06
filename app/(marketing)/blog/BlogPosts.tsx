@@ -107,7 +107,7 @@ export default function BlogPosts({ initialPosts }: BlogPostsProps) {
                         minute read
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div key={post._id} className="flex flex-wrap gap-2">
                       {post.tags?.map((tag) => (
                         <span
                           key={tag._id}

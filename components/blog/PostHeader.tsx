@@ -1,3 +1,4 @@
+// components/blog/PostHeader.tsx
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Tag } from "@/types/blog";
@@ -7,6 +8,7 @@ interface PostHeaderProps {
   featuredImage?: {
     url: string;
     alt: string;
+    imageId?: string;
   };
   date: Date;
   readingTime: number;
@@ -35,11 +37,12 @@ export function PostHeader({
       {featuredImage && (
         <div className="aspect-video relative mb-8">
           <Image
-            src={featuredImage.url}
+            src={featuredImage}
             alt={featuredImage.alt}
             fill
             className="rounded-lg object-cover"
             priority
+            unoptimized={!!featuredImage.imageId}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
           />
         </div>

@@ -22,6 +22,7 @@ interface ModernBlogEditorProps {
     category: string;
     tags: string[];
     featuredImage: string;
+    featuredImageId?: string;
   } | null;
   categories: ICategory[];
   onSave: (data: any) => Promise<void>;
@@ -45,8 +46,16 @@ export default function ModernBlogEditor({
   const [category, setCategory] = useState(initialData?.category || "");
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
   const [inputValue, setInputValue] = useState("");
-  const [featuredImage, setFeaturedImage] = useState(
-    initialData?.featuredImage || "",
+  const [featuredImage, setFeaturedImage] = useState<{
+    url: string;
+    imageId?: string;
+  }>(
+    initialData?.featuredImage
+      ? {
+          url: initialData.featuredImage,
+          imageId: initialData.featuredImageId,
+        }
+      : { url: "", imageId: "" },
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -75,7 +84,8 @@ export default function ModernBlogEditor({
         content,
         category,
         tags,
-        featuredImage,
+        featuredImage: featuredImage.url,
+        featuredImageId: featuredImage.imageId,
         status,
       };
 
@@ -163,8 +173,15 @@ export default function ModernBlogEditor({
               Featured Image
             </h3>
             <ImageUpload
-              onImageSelect={setFeaturedImage}
-              initialImage={featuredImage}
+              onImageSelect={(imageData) => setFeaturedImage(imageData)}
+              initialImage={
+                featuredImage.url
+                  ? {
+                      url: featuredImage.url,
+                      imageId: featuredImage.imageId,
+                    }
+                  : undefined
+              }
             />
           </div>
 
