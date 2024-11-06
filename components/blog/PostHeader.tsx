@@ -1,12 +1,16 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { Tag } from "@/types/blog";
 
 interface PostHeaderProps {
   title: string;
-  featuredImage?: string;
+  featuredImage?: {
+    url: string;
+    alt: string;
+  };
   date: Date;
   readingTime: number;
-  tags: string[];
+  tags: Tag[];
   className?: string;
 }
 
@@ -31,8 +35,8 @@ export function PostHeader({
       {featuredImage && (
         <div className="aspect-video relative mb-8">
           <Image
-            src={featuredImage}
-            alt={title}
+            src={featuredImage.url}
+            alt={featuredImage.alt}
             fill
             className="rounded-lg object-cover"
             priority
@@ -55,10 +59,10 @@ export function PostHeader({
         <div className="flex flex-wrap gap-2 mt-4">
           {tags.map((tag) => (
             <span
-              key={tag}
+              key={tag.id}
               className="px-3 py-1 bg-neutral-800 text-neutral-400 rounded-full text-sm hover:bg-neutral-700 transition-colors"
             >
-              {tag}
+              {tag.name}
             </span>
           ))}
         </div>

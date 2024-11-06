@@ -1,9 +1,17 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Category } from "@/types/blog";
+import { ICategory } from "@/database/category.model";
 import type { OutputData } from "@editorjs/editorjs";
 import ModernBlogEditor from "@/components/admin/ModernBlogEditor";
+import {
+  getPost,
+  getCategories,
+  createPost,
+  updatePost,
+  createCategory,
+} from "@/lib/actions/posts.actions";
+import { toast } from "@/components/ui/use-toast";
 
 interface EditorPageProps {
   postId?: string;
@@ -11,6 +19,7 @@ interface EditorPageProps {
 
 const EditorPage = ({ postId }: EditorPageProps) => {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const isEditMode = Boolean(postId);
 
   const [isLoading, setIsLoading] = useState(isEditMode);
@@ -21,82 +30,64 @@ const EditorPage = ({ postId }: EditorPageProps) => {
     tags: string[];
     featuredImage: string;
   } | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
 
   useEffect(() => {
-    fetchCategories();
-    if (isEditMode && postId) {
-      fetchPost();
-    }
-  }, [isEditMode, postId]);
-
-  const fetchPost = async () => {
-    try {
-      const response = await fetch(`/api/posts/${postId}`);
-      if (!response.ok) throw new Error("Failed to fetch post");
-
-      const { post } = await response.json();
-      setInitialData({
-        title: post.title,
-        content: post.content,
-        category: post.category,
-        tags: post.tags,
-        featuredImage: post.featuredImage || "",
-      });
-    } catch (error) {
-      console.error("Error fetching post:", error);
-      router.push("/admin/dashboard");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("/api/categories");
-      const data = await response.json();
-      if (data.success) {
-        setCategories(data.categories);
+    const initialize = async () => {
+      const categoriesResult = await getCategories();
+      if (categoriesResult.success) {
+        setCategories(categoriesResult.categories);
       }
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-    }
-  };
+
+      if (isEditMode && postId) {
+        const postResult = await getPost(postId);
+        if (postResult.success) {
+          setInitialData(postResult.post);
+        } else {
+          router.push("/admin/dashboard");
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initialize();
+  }, [isEditMode, postId, router]);
 
   const handleSaveOrPublish = async (formData: any) => {
     try {
-      const url = isEditMode ? `/api/posts/${postId}` : "/api/posts";
-      const method = isEditMode ? "PUT" : "POST";
+      startTransition(async () => {
+        const result = isEditMode
+          ? await updatePost(postId!, formData)
+          : await createPost(formData);
 
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        if (result.success) {
+          toast({
+            title: "Success",
+            description: `Post ${isEditMode ? "updated" : "created"} successfully!`,
+          });
+          router.push("/admin/dashboard");
+        } else {
+          throw new Error(result.error);
+        }
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to ${isEditMode ? "update" : "create"} post`);
-      }
-
-      router.push("/admin/dashboard");
     } catch (error) {
       console.error("Error saving post:", error);
-      alert(
-        `Failed to ${isEditMode ? "update" : "create"} post. Please try again.`,
-      );
+      toast({
+        title: "Error",
+        description: `Failed to ${isEditMode ? "update" : "create"} post. Please try again.`,
+        variant: "destructive",
+      });
     }
   };
 
   const handleAddCategory = async (categoryName: string) => {
     try {
-      const response = await fetch("/api/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: categoryName.trim() }),
-      });
-
-      if (response.ok) {
-        await fetchCategories();
+      const result = await createCategory(categoryName.trim());
+      if (result.success) {
+        const categoriesResult = await getCategories();
+        if (categoriesResult.success) {
+          setCategories(categoriesResult.categories);
+        }
         return true;
       }
       return false;

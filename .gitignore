@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+output/
+personal_blog.txt
 
 # next.js
 /.next/

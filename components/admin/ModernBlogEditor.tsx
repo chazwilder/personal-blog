@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { FolderIcon, ImageIcon, Plus, Save, Send, Tag, X } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { Category } from "@/types/blog";
+import { ICategory } from "@/database/category.model";
 import type { OutputData } from "@editorjs/editorjs";
 
 const BlogEditor = dynamic(() => import("@/components/admin/BlogEditor"), {
@@ -23,7 +23,7 @@ interface ModernBlogEditorProps {
     tags: string[];
     featuredImage: string;
   } | null;
-  categories: Category[];
+  categories: ICategory[];
   onSave: (data: any) => Promise<void>;
   onPublish: (data: any) => Promise<void>;
   onAddCategory: (name: string) => Promise<boolean>;

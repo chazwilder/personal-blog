@@ -1,10 +1,35 @@
 import Image from "next/image";
-import { PostStatus } from "@/app/admin/dashboard/components/PostStatus";
-import { BlogPost } from "@/types/blog";
-import { PostActions } from "@/app/admin/dashboard/components/PostActions";
+import { PostStatus } from "./PostStatus";
+import { PostActions } from "./PostActions";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface PostCardProps {
-  post: BlogPost;
+  post: {
+    id: string;
+    title: string;
+    excerpt?: string;
+    slug: string;
+    status: "draft" | "published";
+    category: Category;
+    tags: Tag[];
+    featuredImage?: {
+      url: string;
+      alt: string;
+    };
+    createdAt: string;
+    updatedAt: string;
+  };
   onDelete: (id: string) => void;
 }
 
@@ -15,8 +40,8 @@ export function PostCard({ post, onDelete }: PostCardProps) {
         <div className="flex items-center">
           {post.featuredImage && (
             <Image
-              src={post.featuredImage}
-              alt={post.title}
+              src={post.featuredImage.url}
+              alt={post.featuredImage.alt || post.title}
               width={40}
               height={40}
               className="rounded object-cover mr-3"
@@ -37,12 +62,14 @@ export function PostCard({ post, onDelete }: PostCardProps) {
       </div>
       <div className="hidden sm:flex items-center gap-8">
         <PostStatus status={post.status} />
-        <span className="text-sm text-gray-500 w-24">{post.category}</span>
+        <span className="text-sm text-gray-500 w-24">
+          {post.category?.name || "Uncategorized"}
+        </span>
         <span className="text-sm text-gray-500 w-32">
           {new Date(post.updatedAt).toLocaleDateString()}
         </span>
       </div>
-      <PostActions postId={post._id} onDelete={onDelete} />
+      <PostActions postId={post.id} onDelete={() => onDelete(post.id)} />
     </div>
   );
 }

@@ -4,10 +4,29 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import type { Post } from "@prisma/client";
+
+interface BlogPost {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: {
+    blocks: any[];
+  };
+  featuredImage?: {
+    url: string;
+    alt: string;
+  };
+  tags: {
+    _id: string;
+    name: string;
+    slug: string;
+  }[];
+  createdAt: string;
+}
 
 interface BlogPostsProps {
-  initialPosts: Post[];
+  initialPosts: BlogPost[];
 }
 
 export default function BlogPosts({ initialPosts }: BlogPostsProps) {
@@ -15,13 +34,17 @@ export default function BlogPosts({ initialPosts }: BlogPostsProps) {
   const [selectedTag, setSelectedTag] = useState("all");
 
   // Get unique tags from all posts
-  const allTags = Array.from(new Set(posts.flatMap((post) => post.tags || [])));
+  const allTags = Array.from(
+    new Set(posts.flatMap((post) => post.tags?.map((tag) => tag.name) || [])),
+  );
 
   // Filter posts by selected tag
   const filteredPosts =
     selectedTag === "all"
       ? posts
-      : posts.filter((post) => post.tags?.includes(selectedTag));
+      : posts.filter((post) =>
+          post.tags?.some((tag) => tag.name === selectedTag),
+        );
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col w-full h-full z-[999]">
@@ -56,7 +79,7 @@ export default function BlogPosts({ initialPosts }: BlogPostsProps) {
       <div className="space-y-8 w-full">
         {filteredPosts.map((post, index) => (
           <motion.div
-            key={post.id}
+            key={post._id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -69,9 +92,7 @@ export default function BlogPosts({ initialPosts }: BlogPostsProps) {
                       {post.title}
                     </h2>
                     <p className="text-neutral-400 line-clamp-2">
-                      {post.excerpt ||
-                        post.content?.blocks?.[0]?.data?.text ||
-                        ""}
+                      {post.excerpt}
                     </p>
                     <div className="flex items-center gap-4">
                       <span className="text-sm text-neutral-500">
@@ -89,10 +110,10 @@ export default function BlogPosts({ initialPosts }: BlogPostsProps) {
                     <div className="flex flex-wrap gap-2">
                       {post.tags?.map((tag) => (
                         <span
-                          key={tag}
+                          key={tag._id}
                           className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-neutral-800 text-neutral-400"
                         >
-                          {tag}
+                          {tag.name}
                         </span>
                       ))}
                     </div>

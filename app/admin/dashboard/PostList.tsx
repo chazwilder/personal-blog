@@ -1,21 +1,49 @@
 "use client";
 
 import React, { useOptimistic, useState, useTransition } from "react";
-import { BlogPost } from "@/types/blog";
-import { deletePost, getPosts } from "@/lib/actions/posts";
+import { getPosts, deletePost } from "@/lib/actions/posts.actions";
 import { useRouter } from "next/navigation";
 import { PostHeader } from "./components/PostHeader";
 import { PostFilters } from "./components/PostFilters";
 import { PostCard } from "./components/PostCard";
 import { LoadingState } from "./components/LoadingState";
 import { EmptyState } from "./components/EmptyState";
+import { toast } from "@/components/ui/use-toast";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Post {
+  id: string;
+  title: string;
+  excerpt?: string;
+  slug: string;
+  status: "draft" | "published";
+  category: Category;
+  tags: Tag[];
+  featuredImage?: {
+    url: string;
+    alt: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
 
 type PostStatus = "all" | "published" | "draft";
 
 interface PostListProps {
   initialPosts: {
     success: boolean;
-    data?: BlogPost[];
+    posts?: Post[];
     error?: string;
   };
 }
@@ -23,12 +51,11 @@ interface PostListProps {
 export default function PostList({ initialPosts }: PostListProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [posts, setPosts] = useState<BlogPost[]>(initialPosts.data || []);
-  const [optimisticPosts, addOptimisticPost] = useOptimistic<
-    BlogPost[],
-    string
-  >(posts, (state, postIdToRemove) =>
-    state.filter((post) => post._id !== postIdToRemove),
+  const [posts, setPosts] = useState<Post[]>(initialPosts.posts || []);
+  const [optimisticPosts, addOptimisticPost] = useOptimistic<Post[], string>(
+    posts,
+    (state, postIdToRemove) =>
+      state.filter((post) => post.id !== postIdToRemove),
   );
 
   // Filter states
@@ -39,14 +66,9 @@ export default function PostList({ initialPosts }: PostListProps) {
 
   const handleFilterChange = () => {
     startTransition(async () => {
-      const result = await getPosts({
-        searchTerm,
-        status: statusFilter,
-        sortBy,
-        sortOrder,
-      });
-      if (result.success && result.data) {
-        setPosts(result.data);
+      const result = await getPosts();
+      if (result.success && result.posts) {
+        setPosts(result.posts);
       }
     });
   };
@@ -59,12 +81,26 @@ export default function PostList({ initialPosts }: PostListProps) {
     try {
       const result = await deletePost(postId);
       if (result.success) {
+        toast({
+          title: "Success",
+          description: "Post deleted successfully",
+        });
         router.refresh();
       } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to delete post",
+          variant: "destructive",
+        });
         handleFilterChange();
       }
     } catch (error) {
       console.error("Error deleting post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete post",
+        variant: "destructive",
+      });
       handleFilterChange();
     }
   };
@@ -121,11 +157,7 @@ export default function PostList({ initialPosts }: PostListProps) {
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <div className="min-w-full divide-y divide-gray-200">
             {filteredPosts.map((post) => (
-              <PostCard
-                key={post._id}
-                post={post}
-                onDelete={handleDeletePost}
-              />
+              <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
             ))}
           </div>
         </div>
