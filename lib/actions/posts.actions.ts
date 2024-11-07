@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import slugify from "slugify";
 import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
+import { calculateReadingTime } from "@/lib/utils";
 
 export interface PostFormData {
   title: string;
@@ -60,6 +61,7 @@ export async function getPosts() {
       id: post._id.toString(),
       title: post.title,
       excerpt: post.excerpt,
+      readingTime: calculateReadingTime(post.content.blocks),
       slug: post.slug,
       status: post.status,
       category: post.category
@@ -322,6 +324,7 @@ export async function getPostBySlug(slug: string) {
       title: post.title,
       content: post.content,
       excerpt: post.excerpt,
+      readingTime: calculateReadingTime(post.content.blocks),
       slug: post.slug,
       status: post.status,
       category: post.category

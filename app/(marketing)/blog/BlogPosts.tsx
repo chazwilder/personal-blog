@@ -4,41 +4,22 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-
-interface BlogPost {
-  _id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: {
-    blocks: any[];
-  };
-  featuredImage?: {
-    url: string;
-    alt: string;
-  };
-  tags: {
-    _id: string;
-    name: string;
-    slug: string;
-  }[];
-  createdAt: string;
-}
+import { IBlogPost } from "@/database/post.model";
 
 interface BlogPostsProps {
-  initialPosts: BlogPost[];
+  initialPosts: IBlogPost[];
 }
 
 export default function BlogPosts({ initialPosts }: BlogPostsProps) {
-  const [posts] = useState(initialPosts);
+  const [posts] = useState(
+    initialPosts.filter((post) => post.status === "published"),
+  );
   const [selectedTag, setSelectedTag] = useState("all");
 
-  // Get unique tags from all posts
   const allTags = Array.from(
     new Set(posts.flatMap((post) => post.tags?.map((tag) => tag.name) || [])),
   );
 
-  // Filter posts by selected tag
   const filteredPosts =
     selectedTag === "all"
       ? posts
@@ -103,8 +84,7 @@ export default function BlogPosts({ initialPosts }: BlogPostsProps) {
                         })}
                       </span>
                       <span className="text-sm text-neutral-500">
-                        {Math.ceil((post.content?.blocks?.length || 0) / 4)}{" "}
-                        minute read
+                        {post.readingTime} minute read
                       </span>
                     </div>
                     <div key={post._id} className="flex flex-wrap gap-2">

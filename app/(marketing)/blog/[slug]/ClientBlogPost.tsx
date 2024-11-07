@@ -18,7 +18,7 @@ export default function ClientBlogPost({ post }: BlogContentProps) {
         title={post.title}
         featuredImage={post.featuredImage}
         date={new Date(post.createdAt)}
-        readingTime={Math.ceil((post.content?.blocks?.length || 0) / 4)}
+        readingTime={post.readingTime}
         tags={post.tags}
       />
 
