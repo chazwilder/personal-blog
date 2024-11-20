@@ -120,6 +120,33 @@ export async function createPost(formData: PostFormData) {
     const tagIds = await getOrCreateTags(formData.tags);
     const slug = slugify(formData.title, { lower: true, strict: true });
 
+    // Extract meta description from content
+    let metaDescription = "";
+    if (formData.content?.blocks) {
+      // Try to find the first paragraph block
+      const firstParagraph = formData.content.blocks.find(
+        (block) => block.type === "paragraph",
+      );
+
+      if (firstParagraph?.data?.text) {
+        // Clean and trim the text
+        metaDescription = firstParagraph.data.text
+          .replace(/\s+/g, " ") // Replace multiple spaces with single space
+          .trim()
+          .slice(0, 155);
+
+        // Add ellipsis if the text was trimmed
+        if (firstParagraph.data.text.length > 155) {
+          metaDescription += "...";
+        }
+      }
+    }
+
+    // Fallback to title if no paragraph is found
+    if (!metaDescription) {
+      metaDescription = `${formData.title} - Read more about this topic on our blog.`;
+    }
+
     const newPost = new Post({
       title: formData.title,
       content: formData.content,
@@ -137,8 +164,11 @@ export async function createPost(formData: PostFormData) {
       author: authorId,
       seo: {
         metaTitle: formData.title,
-        metaDescription:
-          formData.content.blocks?.[0]?.data?.text?.slice(0, 155) || "",
+        metaDescription: metaDescription,
+        focusKeywords: formData.tags,
+        // You can also add other SEO fields here if needed
+        // canonicalUrl: `https://yourdomain.com/blog/${slug}`,
+        // ogImage: formData.featuredImage?.url
       },
     });
 

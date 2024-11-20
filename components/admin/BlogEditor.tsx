@@ -3,7 +3,9 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import type { BlockToolConstructable, OutputData } from "@editorjs/editorjs";
-
+import EditorjsList from "@editorjs/list";
+import DragDrop from "editorjs-drag-drop";
+import Undo from "editorjs-undo";
 import { uploadFile } from "./UploadHandler";
 
 type HeaderConfig = {
@@ -14,6 +16,7 @@ type HeaderConfig = {
 
 type ListConfig = {
   defaultStyle: "unordered" | "ordered";
+  maxLevel?: number;
 };
 
 type QuoteConfig = {
@@ -100,10 +103,8 @@ const lucideToSvg = (Icon: any) => {
     strokeLinejoin: "round",
   };
 
-  // Get the path/paths from the icon
   const paths = Icon.toString();
 
-  // Create SVG string
   return `<svg ${Object.entries(defaultAttributes)
     .map(([key, value]) => `${key}="${value}"`)
     .join(" ")}>${paths}</svg>`;
@@ -124,7 +125,6 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
         const [
           { default: EditorJS },
           { default: Header },
-          { default: List },
           { default: Checklist },
           { default: Quote },
           { default: Delimiter },
@@ -138,7 +138,6 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
         ] = await Promise.all([
           import("@editorjs/editorjs"),
           import("@editorjs/header"),
-          import("@editorjs/list"),
           import("@editorjs/checklist"),
           import("@editorjs/quote"),
           import("@editorjs/delimiter"),
@@ -197,10 +196,11 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
             inlineToolbar: true,
           },
           list: {
-            class: List,
+            class: EditorjsList,
             inlineToolbar: true,
             config: {
               defaultStyle: "unordered",
+              maxLevel: 4,
             },
             toolbox: [
               {
@@ -211,7 +211,13 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
               {
                 title: "Numbered List",
                 icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-ordered"><path d="M10 12h11"/><path d="M10 18h11"/><path d="M10 6h11"/><path d="M4 10h2"/><path d="M4 6h1v4"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>',
-                data: { style: "ordered" },
+                data: {
+                  style: "ordered",
+                  meta: {
+                    start: 1,
+                    counterType: "numeric",
+                  },
+                },
               },
             ],
           },
@@ -316,6 +322,9 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
           },
           mermaid: {
             class: MermaidTool,
+            config: {
+              theme: "neutral",
+            },
           },
           raw: Raw,
         };
@@ -327,6 +336,47 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
           defaultBlock: "paragraph",
           inlineToolbar: ["bold", "italic", "link"],
           data: initialData || { blocks: [] },
+          onReady: () => {
+            // Initialize drag and drop
+            new DragDrop(editor);
+
+            // Initialize undo/redo
+            new Undo({ editor });
+
+            // Add keyboard shortcuts for nested lists
+            editor.keyboard.addBinding({
+              key: "TAB",
+              callback: (event) => {
+                event.preventDefault();
+                const currentBlock = editor.blocks.getCurrentBlock();
+                if (currentBlock?.name === "list") {
+                  editor.blocks
+                    .getBlockByIndex(currentBlock.index)
+                    ?.incrementLevel();
+                }
+              },
+            });
+
+            editor.keyboard.addBinding({
+              key: "TAB",
+              shiftKey: true,
+              callback: (event) => {
+                event.preventDefault();
+                const currentBlock = editor.blocks.getCurrentBlock();
+                if (currentBlock?.name === "list") {
+                  editor.blocks
+                    .getBlockByIndex(currentBlock.index)
+                    ?.decrementLevel();
+                }
+              },
+            });
+
+            // Configure Mermaid
+            MermaidTool.config({ theme: "neutral" });
+
+            editorRef.current = editor;
+            setIsReady(true);
+          },
           onChange: async () => {
             try {
               if (onChange && editor) {
@@ -374,13 +424,6 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
             },
           },
         });
-
-        await editor.isReady;
-        editorRef.current = editor;
-        setIsReady(true);
-
-        // Configure Mermaid
-        MermaidTool.config({ theme: "neutral" });
       } catch (error) {
         console.error("Failed to load editor:", error);
       }
