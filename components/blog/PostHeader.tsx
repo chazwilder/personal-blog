@@ -43,7 +43,7 @@ export function PostHeader({
             className="rounded-lg object-cover"
             priority
             unoptimized={!!featuredImage.imageId}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+            //sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
           />
         </div>
       )}
