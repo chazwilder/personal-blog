@@ -10,7 +10,6 @@ export function ListBlock({ items, style, className }: ListBlockProps) {
       className={cn(
         "my-4 text-neutral-300 text-lg",
         style === "ordered" ? "list-decimal" : "list-disc",
-        "list-inside",
         className,
       )}
     >

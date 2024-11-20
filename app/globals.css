@@ -73,12 +73,12 @@ body {
     }
 }
 
-.image-tool__caption {
-    visibility: hidden;
-    height: 0;
-    width: 0;
-    padding: 0;
-}
+/*.image-tool__caption {*/
+/*    visibility: hidden;*/
+/*    height: 0;*/
+/*    width: 0;*/
+/*    padding: 0;*/
+/*}*/
 
 /* Atyp Display Family */
 @font-face {

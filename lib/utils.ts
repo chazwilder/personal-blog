@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const calculateReadingTime = (blocks: any[] = []) => {
-  const WORDS_PER_MINUTE = 200;
+  const WORDS_PER_MINUTE = 170;
   let wordCount = 0;
 
   blocks.forEach((block) => {
