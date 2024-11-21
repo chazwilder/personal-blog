@@ -275,7 +275,7 @@ export default function ModernBlogEditor({
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-white font-medium text-gray-800 hover:bg-gray-200"
                   >
                     {tag}
                     <button
@@ -298,7 +298,7 @@ export default function ModernBlogEditor({
                     }
                   }}
                   placeholder={tags.length === 0 ? "Add tags..." : ""}
-                  className="flex-1 min-w-[60px] border-0 focus:outline-none focus:ring-0 text-sm"
+                  className="flex-1 min-w-[60px] bg-white border-0 focus:outline-none focus:ring-0 text-sm"
                 />
               </div>
               <p className="text-xs text-gray-500">Press enter to add a tag</p>

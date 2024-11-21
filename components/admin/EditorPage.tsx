@@ -17,6 +17,14 @@ interface EditorPageProps {
   postId?: string;
 }
 
+interface SerializedCategory {
+  _id: string;
+  name: string;
+  postCount: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 const EditorPage = ({ postId }: EditorPageProps) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -30,7 +38,7 @@ const EditorPage = ({ postId }: EditorPageProps) => {
     tags: string[];
     featuredImage: string;
   } | null>(null);
-  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [categories, setCategories] = useState<SerializedCategory[]>([]);
 
   useEffect(() => {
     const initialize = async () => {

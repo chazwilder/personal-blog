@@ -344,32 +344,54 @@ const BlogEditor = ({ onChange, initialData }: BlogEditorProps) => {
             new Undo({ editor });
 
             // Add keyboard shortcuts for nested lists
-            editor.keyboard.addBinding({
-              key: "TAB",
-              callback: (event) => {
-                event.preventDefault();
-                const currentBlock = editor.blocks.getCurrentBlock();
-                if (currentBlock?.name === "list") {
-                  editor.blocks
-                    .getBlockByIndex(currentBlock.index)
-                    ?.incrementLevel();
-                }
-              },
-            });
+            if (editor.keyboard) {
+              // Add keyboard shortcuts for nested lists
+              editor.keyboard.addBinding({
+                key: "TAB",
+                callback: (event) => {
+                  event.preventDefault();
+                  const currentBlock = editor.blocks.getCurrentBlock();
+                  if (currentBlock?.name === "list") {
+                    editor.blocks
+                      .getBlockByIndex(currentBlock.index)
+                      ?.incrementLevel();
+                  }
+                },
+              });
 
-            editor.keyboard.addBinding({
-              key: "TAB",
-              shiftKey: true,
-              callback: (event) => {
-                event.preventDefault();
-                const currentBlock = editor.blocks.getCurrentBlock();
-                if (currentBlock?.name === "list") {
-                  editor.blocks
-                    .getBlockByIndex(currentBlock.index)
-                    ?.decrementLevel();
-                }
-              },
-            });
+              editor.keyboard.addBinding({
+                key: "TAB",
+                shiftKey: true,
+                callback: (event) => {
+                  event.preventDefault();
+                  const currentBlock = editor.blocks.getCurrentBlock();
+                  if (currentBlock?.name === "list") {
+                    editor.blocks
+                      .getBlockByIndex(currentBlock.index)
+                      ?.decrementLevel();
+                  }
+                },
+              });
+            }
+
+            // Mobile-specific touch handling
+            if ("ontouchstart" in window) {
+              const editorElement = holderRef.current;
+              editorElement?.addEventListener(
+                "touchstart",
+                (e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.classList.contains("ce-toolbar__plus")) {
+                    e.preventDefault();
+                    // Add haptic feedback if available
+                    if (navigator.vibrate) {
+                      navigator.vibrate(50);
+                    }
+                  }
+                },
+                { passive: false },
+              );
+            }
 
             // Configure Mermaid
             MermaidTool.config({ theme: "neutral" });
