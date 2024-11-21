@@ -73,12 +73,111 @@ body {
     }
 }
 
-/*.image-tool__caption {*/
-/*    visibility: hidden;*/
-/*    height: 0;*/
-/*    width: 0;*/
-/*    padding: 0;*/
-/*}*/
+.image-tool__caption {
+    visibility: hidden;
+    height: 0;
+    width: 0;
+    padding: 0;
+}
+
+
+@media (max-width: 768px) {
+    .ce-toolbar__plus {
+        width: 44px !important;
+        height: 44px !important;
+        border-radius: 22px !important;
+        background: var(--main, #b8ff34) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        transition: transform 0.2s ease !important;
+    }
+
+    .ce-toolbar__plus:active {
+        transform: scale(0.95) !important;
+    }
+
+    .ce-toolbar__plus-icon {
+        transform: scale(1.2) !important;
+    }
+
+    .ce-popover {
+        position: fixed !important;
+        bottom: 80px !important;
+        top: auto !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 90% !important;
+        max-width: 400px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+        backdrop-filter: blur(8px) !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    .ce-popover__items {
+        max-height: 50vh !important;
+        overflow-y: auto !important;
+        padding: 8px !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .ce-popover__item {
+        padding: 12px !important;
+        border-radius: 8px !important;
+        transition: background-color 0.2s ease !important;
+        margin-bottom: 4px !important;
+    }
+
+    .ce-popover__item:active {
+        background-color: rgba(0,0,0,0.05) !important;
+    }
+
+    .ce-popover__item-icon {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .ce-popover__item-label {
+        font-size: 16px !important;
+        padding-left: 8px !important;
+    }
+
+    /* Improve toolbar interaction on mobile */
+    .ce-toolbar__actions {
+        padding: 8px !important;
+    }
+
+    .ce-toolbar__settings-btn {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 8px !important;
+    }
+
+    /* Better block handling on mobile */
+    .ce-block {
+        padding: 8px !important;
+    }
+
+    .ce-block--selected {
+        background-color: rgba(184, 255, 52, 0.1) !important;
+        border-radius: 8px !important;
+    }
+
+    /* Improve inline toolbar for mobile */
+    .ce-inline-toolbar {
+        border-radius: 8px !important;
+        padding: 4px !important;
+    }
+
+    .ce-inline-toolbar__buttons {
+        gap: 4px !important;
+    }
+
+    .ce-inline-tool {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 6px !important;
+    }
+}
 
 /* Atyp Display Family */
 @font-face {
