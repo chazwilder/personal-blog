@@ -50,37 +50,46 @@ function highlightPythonSyntax(code: string) {
   return result;
 }
 
-export function CodeBlock({ code, className }: CodeBlockProps) {
+export function CodeBlock({
+  code,
+  language = "python",
+  className,
+}: CodeBlockProps) {
   return (
-    <pre
-      className={cn(
-        "bg-neutral-800/75 backdrop-blur supports-[backdrop-filter]:bg-neutral-800/75",
-        "p-4 rounded-lg my-4",
-        "overflow-x-auto",
-        "border border-neutral-700",
-        className,
-      )}
-    >
-      <div className="flex items-center gap-2 mb-3 text-neutral-400 text-xs">
-        <div className="flex space-x-2">
-          <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/40" />
-          <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/40" />
-          <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/40" />
-        </div>
-        <span className="ml-auto uppercase text-neutral-500">python</span>
-      </div>
-      <code
+    <div className="relative w-full flex flex-col mx-auto">
+      <pre
         className={cn(
-          "block font-mono text-sm leading-relaxed",
-          "text-neutral-300",
-          "[&_.keyword]:text-pink-400",
-          "[&_.function]:text-blue-400",
-          "[&_.class-name]:text-yellow-400",
-          "[&_.comment]:text-neutral-500 [&_.comment]:italic",
-          "whitespace-pre",
+          "flex flex-col w-full mx-auto",
+          "bg-neutral-800/75 backdrop-blur supports-[backdrop-filter]:bg-neutral-800/75",
+          "p-4 sm:rounded-lg",
+          "overflow-x-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-neutral-600",
+          "border border-neutral-700",
+          className,
         )}
-        dangerouslySetInnerHTML={{ __html: highlightPythonSyntax(code) }}
-      />
-    </pre>
+      >
+        <div className="flex items-center gap-2 mb-3 text-neutral-400 text-xs">
+          <div className="flex space-x-2">
+            <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/40" />
+            <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/40" />
+            <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/40" />
+          </div>
+          <span className="ml-auto uppercase text-neutral-500">{language}</span>
+        </div>
+        <div className="overflow-x-auto">
+          <code
+            className={cn(
+              "block font-mono text-sm leading-relaxed",
+              "text-neutral-300",
+              "[&_.keyword]:text-pink-400",
+              "[&_.function]:text-blue-400",
+              "[&_.class-name]:text-yellow-400",
+              "[&_.comment]:text-neutral-500 [&_.comment]:italic",
+              "whitespace-pre",
+            )}
+            dangerouslySetInnerHTML={{ __html: highlightPythonSyntax(code) }}
+          />
+        </div>
+      </pre>
+    </div>
   );
 }
