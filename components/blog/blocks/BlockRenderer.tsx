@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { HeaderBlock } from "./Header";
 import { ParagraphBlock } from "./Paragraph";
 import { ImageBlock } from "./Image";
@@ -12,10 +13,26 @@ interface BlockData {
   data: any;
 }
 
+// Helper function to create safe IDs
+function createSafeId(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric chars with hyphens
+    .replace(/(^-|-$)/g, ""); // Remove leading/trailing hyphens
+}
+
 export function BlockRenderer({ block }: { block: BlockData }) {
   switch (block.type) {
     case "header":
-      return <HeaderBlock level={block.data.level} text={block.data.text} />;
+      const headerId = createSafeId(block.data.text);
+      return (
+        <div
+          id={headerId}
+          className="scroll-mt-24" // Add scroll margin for header offset
+        >
+          <HeaderBlock level={block.data.level} text={block.data.text} />
+        </div>
+      );
 
     case "paragraph":
       return <ParagraphBlock text={block.data.text} html={true} />;
