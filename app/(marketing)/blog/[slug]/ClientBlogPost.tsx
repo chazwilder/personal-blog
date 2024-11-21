@@ -22,32 +22,34 @@ interface BlogContentProps {
 
 function SocialShare({ url, title }: { url: string; title: string }) {
   return (
-    <div className="flex items-center gap-4 my-8">
+    <div className="flex flex-wrap items-center gap-4 my-8">
       <span className="text-sm text-white/60">Share:</span>
-      <Link
-        href={`https://www.linkedin.com/sharing/share-offsite/?url=${url}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-      >
-        <LinkedinIcon className="w-4 h-4 text-white/60" />
-      </Link>
-      <Link
-        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${url}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-      >
-        <TwitterIcon className="w-4 h-4 text-white/60" />
-      </Link>
-      <Link
-        href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-      >
-        <FacebookIcon className="w-4 h-4 text-white/60" />
-      </Link>
+      <div className="flex gap-2">
+        <Link
+          href={`https://www.linkedin.com/sharing/share-offsite/?url=${url}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        >
+          <LinkedinIcon className="w-4 h-4 text-white/60" />
+        </Link>
+        <Link
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${url}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        >
+          <TwitterIcon className="w-4 h-4 text-white/60" />
+        </Link>
+        <Link
+          href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        >
+          <FacebookIcon className="w-4 h-4 text-white/60" />
+        </Link>
+      </div>
     </div>
   );
 }
@@ -100,7 +102,7 @@ function RelatedPosts({ posts }: { posts: BlogPost[] }) {
   return (
     <div className="mt-16">
       <h3 className="text-xl font-bold text-white mb-6">Related Posts</h3>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {posts.map((post) => (
           <Link
             key={post.id}
@@ -145,10 +147,8 @@ export default function ClientBlogPost({
   const [shareUrl, setShareUrl] = useState<string>("");
 
   useEffect(() => {
-    // Set share URL once we're on the client
     setShareUrl(window.location.href);
 
-    // Handle initial hash navigation
     if (window.location.hash) {
       const id = window.location.hash.slice(1);
       const element = document.getElementById(id);
@@ -162,7 +162,6 @@ export default function ClientBlogPost({
       }
     }
 
-    // Extract headers from content blocks for TOC
     const headers =
       post.content?.blocks
         ?.filter((block) => block.type === "header")
@@ -174,7 +173,6 @@ export default function ClientBlogPost({
 
     setTableOfContents(headers);
 
-    // Set up intersection observer for active section
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -199,9 +197,9 @@ export default function ClientBlogPost({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 mb-16 flex gap-8 relative z-[100]">
+    <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12 flex flex-col lg:flex-row gap-8 relative z-[100] w-full">
       {/* Main Content */}
-      <article className="flex-1 max-w-3xl">
+      <article className="flex-1 w-full lg:max-w-3xl mx-auto">
         <PostHeader
           title={post.title}
           featuredImage={post.featuredImage}
@@ -222,15 +220,15 @@ export default function ClientBlogPost({
 
         {/* Author Section */}
         <div className="mt-16 border-t border-white/10 pt-8">
-          <div className="flex gap-6 items-start">
+          <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
             <Image
               src={AUTHOR_INFO.image}
               alt={AUTHOR_INFO.name}
               width={100}
               height={100}
-              className="rounded-full"
+              className="rounded-full shrink-0"
             />
-            <div className="flex-1">
+            <div className="flex-1 text-center sm:text-left">
               <h3 className="text-xl font-bold text-white mb-2">
                 {AUTHOR_INFO.name}
               </h3>
@@ -240,7 +238,7 @@ export default function ClientBlogPost({
                 <h4 className="text-sm font-semibold text-white/80 mb-2">
                   Tech Stack
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                   {AUTHOR_INFO.techStack.map((tech) => (
                     <span
                       key={tech}
@@ -252,7 +250,7 @@ export default function ClientBlogPost({
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex justify-center sm:justify-start gap-3 flex-wrap">
                 {AUTHOR_INFO.links.map((link) => (
                   <Link
                     key={link.name}
@@ -274,7 +272,7 @@ export default function ClientBlogPost({
       </article>
 
       {/* Sidebar with TOC */}
-      <div className="hidden lg:block w-64">
+      <div className="hidden lg:block w-64 flex-shrink-0">
         <div className="sticky top-24 space-y-6">
           <TableOfContents
             headers={tableOfContents}
