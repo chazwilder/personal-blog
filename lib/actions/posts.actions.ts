@@ -96,7 +96,16 @@ export async function getCategories() {
   try {
     await connectToDatabase();
     const categories = await Category.find({}).sort({ name: 1 });
-    return { success: true, categories };
+
+    const serializedCategories = categories.map((cat) => ({
+      _id: cat._id.toString(),
+      name: cat.name,
+      postCount: cat.postCount,
+      createdAt: cat.createdAt?.toISOString(),
+      updatedAt: cat.updatedAt?.toISOString(),
+    }));
+
+    return { success: true, categories: serializedCategories };
   } catch (error) {
     console.error("Error fetching categories:", error);
     return { success: false, error: "Failed to fetch categories" };
