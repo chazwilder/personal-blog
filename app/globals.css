@@ -111,6 +111,8 @@ body {
         box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
         backdrop-filter: blur(8px) !important;
         background: rgba(255, 255, 255, 0.9) !important;
+        z-index: 9999 !important;
+        isolation: isolate !important;
     }
 
     .ce-popover__items {
