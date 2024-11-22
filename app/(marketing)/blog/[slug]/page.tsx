@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getPostBySlug, getPosts } from "@/lib/actions/posts.actions";
-import ClientBlogPost from "./ClientBlogPost";
+import ClientBlogPost from "../../../../components/features/blog/ClientBlogPost";
 import { BlogPost } from "@/types/blog";
 import { Metadata } from "next";
 

@@ -54,7 +54,7 @@ export default function BlogPosts({ initialPosts }: BlogPostsProps) {
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 flex gap-8">
       {/* Main Content */}
-      <div className="flex-1">
+      <div className="flex-1 w-full">
         {/* Static Search Bar */}
         <div className="relative w-full mb-8">
           <div className="flex items-center gap-2 w-full px-4 py-2 bg-white/10 hover:bg-white/15 focus-within:bg-white/15 backdrop-blur-sm rounded-lg border border-white/20 transition-colors">
