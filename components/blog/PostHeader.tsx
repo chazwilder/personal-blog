@@ -48,9 +48,7 @@ export function PostHeader({
         </div>
       )}
 
-      <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-        {title}
-      </h1>
+      <h1 className="text-4xl md:text-5xl font-bold text-main mb-4">{title}</h1>
 
       <div className="flex flex-wrap gap-4 items-center text-neutral-400">
         <time dateTime={date.toISOString()}>{formatDate(date)}</time>

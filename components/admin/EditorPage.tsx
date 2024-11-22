@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ICategory } from "@/database/category.model";
 import type { OutputData } from "@editorjs/editorjs";
 import ModernBlogEditor from "@/components/admin/ModernBlogEditor";
 import {
@@ -25,19 +24,31 @@ interface SerializedCategory {
   updatedAt?: string;
 }
 
+interface SEOData {
+  metaTitle: string;
+  metaDescription: string;
+  canonicalUrl?: string;
+  focusKeywords?: string[];
+  ogImage?: string;
+}
+
+interface InitialData {
+  title: string;
+  content: OutputData | null;
+  category: string;
+  tags: string[];
+  featuredImage: string;
+  featuredImageId?: string;
+  seo?: SEOData;
+}
+
 const EditorPage = ({ postId }: EditorPageProps) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const isEditMode = Boolean(postId);
 
   const [isLoading, setIsLoading] = useState(isEditMode);
-  const [initialData, setInitialData] = useState<{
-    title: string;
-    content: OutputData | null;
-    category: string;
-    tags: string[];
-    featuredImage: string;
-  } | null>(null);
+  const [initialData, setInitialData] = useState<InitialData | null>(null);
   const [categories, setCategories] = useState<SerializedCategory[]>([]);
 
   useEffect(() => {
@@ -50,7 +61,25 @@ const EditorPage = ({ postId }: EditorPageProps) => {
       if (isEditMode && postId) {
         const postResult = await getPost(postId);
         if (postResult.success) {
-          setInitialData(postResult.post);
+          // Transform the post data to match our expected format
+          const transformedData: InitialData = {
+            title: postResult.post.title,
+            content: postResult.post.content,
+            category: postResult.post.category,
+            tags: postResult.post.tags,
+            featuredImage: postResult.post.featuredImage || "",
+            featuredImageId: postResult.post.featuredImageId,
+            seo: {
+              metaTitle:
+                postResult.post.seo?.metaTitle || postResult.post.title,
+              metaDescription: postResult.post.seo?.metaDescription || "",
+              canonicalUrl: postResult.post.seo?.canonicalUrl,
+              focusKeywords: postResult.post.seo?.focusKeywords || [],
+              ogImage:
+                postResult.post.seo?.ogImage || postResult.post.featuredImage,
+            },
+          };
+          setInitialData(transformedData);
         } else {
           router.push("/admin/dashboard");
         }

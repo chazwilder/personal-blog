@@ -1,7 +1,16 @@
 "use client";
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { FolderIcon, ImageIcon, Plus, Save, Send, Tag, X } from "lucide-react";
+import {
+  FolderIcon,
+  ImageIcon,
+  Plus,
+  Save,
+  Send,
+  Tag,
+  X,
+  Settings,
+} from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { ICategory } from "@/database/category.model";
 import type { OutputData } from "@editorjs/editorjs";
@@ -15,6 +24,14 @@ const BlogEditor = dynamic(() => import("@/components/admin/BlogEditor"), {
   ),
 });
 
+interface SEOData {
+  metaTitle: string;
+  metaDescription: string;
+  canonicalUrl?: string;
+  focusKeywords: string[];
+  ogImage?: string;
+}
+
 interface ModernBlogEditorProps {
   initialData: {
     title: string;
@@ -23,6 +40,7 @@ interface ModernBlogEditorProps {
     tags: string[];
     featuredImage: string;
     featuredImageId?: string;
+    seo?: SEOData;
   } | null;
   categories: ICategory[];
   onSave: (data: any) => Promise<void>;
@@ -39,6 +57,7 @@ export default function ModernBlogEditor({
   onAddCategory,
   isEditMode,
 }: ModernBlogEditorProps) {
+  // Existing state
   const [title, setTitle] = useState(initialData?.title || "");
   const [content, setContent] = useState<OutputData | null>(
     initialData?.content || null,
@@ -60,6 +79,18 @@ export default function ModernBlogEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategory, setNewCategory] = useState("");
+
+  // New SEO state
+  const [seo, setSeo] = useState<SEOData>(
+    initialData?.seo || {
+      metaTitle: "",
+      metaDescription: "",
+      canonicalUrl: "",
+      focusKeywords: [],
+      ogImage: "",
+    },
+  );
+  const [keywordInput, setKeywordInput] = useState("");
 
   const handleSave = async (status: "draft" | "published") => {
     if (!title.trim()) {
@@ -87,6 +118,12 @@ export default function ModernBlogEditor({
         featuredImage: featuredImage.url,
         featuredImageId: featuredImage.imageId,
         status,
+        seo: {
+          ...seo,
+          metaTitle: seo.metaTitle || title,
+          metaDescription:
+            seo.metaDescription || content.blocks[0]?.data?.text?.slice(0, 155),
+        },
       };
 
       if (status === "published") {
@@ -106,6 +143,23 @@ export default function ModernBlogEditor({
       setNewCategory("");
       setIsAddingCategory(false);
     }
+  };
+
+  const handleAddKeyword = (keyword: string) => {
+    if (keyword && !seo.focusKeywords.includes(keyword)) {
+      setSeo((prev) => ({
+        ...prev,
+        focusKeywords: [...prev.focusKeywords, keyword],
+      }));
+    }
+    setKeywordInput("");
+  };
+
+  const handleRemoveKeyword = (keyword: string) => {
+    setSeo((prev) => ({
+      ...prev,
+      focusKeywords: prev.focusKeywords.filter((k) => k !== keyword),
+    }));
   };
 
   return (
@@ -302,6 +356,129 @@ export default function ModernBlogEditor({
                 />
               </div>
               <p className="text-xs text-gray-500">Press enter to add a tag</p>
+            </div>
+          </div>
+          {/* SEO Section */}
+          <div>
+            <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              SEO Settings
+            </h3>
+            <div className="space-y-4">
+              {/* Meta Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Meta Title
+                </label>
+                <input
+                  type="text"
+                  value={seo.metaTitle}
+                  onChange={(e) =>
+                    setSeo((prev) => ({ ...prev, metaTitle: e.target.value }))
+                  }
+                  placeholder="Enter meta title"
+                  className="mt-1 w-full bg-white text-black rounded-md border p-2 text-sm"
+                  maxLength={60}
+                />
+                <p className="mt-1 text-xs text-black">
+                  {seo.metaTitle.length}/60 characters
+                </p>
+              </div>
+
+              {/* Meta Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Meta Description
+                </label>
+                <textarea
+                  value={seo.metaDescription}
+                  onChange={(e) =>
+                    setSeo((prev) => ({
+                      ...prev,
+                      metaDescription: e.target.value,
+                    }))
+                  }
+                  placeholder="Enter meta description..."
+                  className="mt-1 w-full bg-white rounded-md border p-2 text-sm"
+                  rows={3}
+                  maxLength={155}
+                />
+                <p className="mt-1 text-xs text-black">
+                  {seo.metaDescription.length}/155 characters
+                </p>
+              </div>
+
+              {/* Canonical URL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Canonical URL
+                </label>
+                <input
+                  type="url"
+                  value={seo.canonicalUrl}
+                  onChange={(e) =>
+                    setSeo((prev) => ({
+                      ...prev,
+                      canonicalUrl: e.target.value,
+                    }))
+                  }
+                  placeholder="https://example.com/blog/post"
+                  className="mt-1 w-full rounded-md border bg-white p-2 text-sm"
+                />
+              </div>
+
+              {/* Focus Keywords */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Focus Keywords
+                </label>
+                <div className="mt-1 flex flex-wrap gap-2 min-h-[32px] border rounded-md p-1.5 bg-white">
+                  {seo.focusKeywords.map((keyword) => (
+                    <span
+                      key={keyword}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-white text-gray-800"
+                    >
+                      {keyword}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveKeyword(keyword)}
+                        className="hover:text-gray-600"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    value={keywordInput}
+                    onChange={(e) => setKeywordInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && keywordInput) {
+                        e.preventDefault();
+                        handleAddKeyword(keywordInput);
+                      }
+                    }}
+                    placeholder="Add keywords..."
+                    className="flex-1 min-w-[60px] border-0 bg-white text-black focus:outline-none focus:ring-0 text-sm p-1"
+                  />
+                </div>
+              </div>
+
+              {/* OG Image URL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  OG Image URL
+                </label>
+                <input
+                  type="url"
+                  value={seo.ogImage}
+                  onChange={(e) =>
+                    setSeo((prev) => ({ ...prev, ogImage: e.target.value }))
+                  }
+                  placeholder="https://example.com/og-image.jpg"
+                  className="mt-1 w-full bg-white text-black rounded-md border p-2 text-sm"
+                />
+              </div>
             </div>
           </div>
         </div>
