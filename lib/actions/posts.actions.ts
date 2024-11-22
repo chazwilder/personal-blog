@@ -12,6 +12,14 @@ import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
 import { calculateReadingTime } from "@/lib/utils";
 
+interface SEOData {
+  metaTitle: string;
+  metaDescription: string;
+  canonicalUrl?: string;
+  focusKeywords?: string[];
+  ogImage?: string;
+}
+
 export interface PostFormData {
   title: string;
   content: any;
@@ -20,6 +28,7 @@ export interface PostFormData {
   featuredImage?: string;
   featuredImageId?: string;
   status: "draft" | "published";
+  seo?: SEOData;
 }
 
 export async function getPost(postId: string) {
@@ -31,16 +40,35 @@ export async function getPost(postId: string) {
       return { success: false, error: "Post not found" };
     }
 
+    // Convert MongoDB specific types to plain JavaScript types
+    const sanitizedPost = {
+      title: post.title,
+      content: post.content,
+      category:
+        typeof post.category === "object"
+          ? post.category.toString()
+          : post.category,
+      tags: Array.isArray(post.tags)
+        ? post.tags.map((tag) =>
+            typeof tag === "object" ? tag.toString() : tag,
+          )
+        : [],
+      featuredImage: post.featuredImage?.url || "",
+      featuredImageId: post.featuredImage?.imageId
+        ? post.featuredImage.imageId.toString()
+        : "",
+      seo: {
+        metaTitle: post.seo?.metaTitle || post.title,
+        metaDescription: post.seo?.metaDescription || "",
+        canonicalUrl: post.seo?.canonicalUrl || null,
+        focusKeywords: post.seo?.focusKeywords || [],
+        ogImage: post.seo?.ogImage || post.featuredImage?.url || null,
+      },
+    };
+
     return {
       success: true,
-      post: {
-        title: post.title,
-        content: post.content,
-        category: post.category,
-        tags: post.tags,
-        featuredImage: post.featuredImage?.url || "",
-        featuredImageId: post.featuredImage?.imageId || "",
-      },
+      post: sanitizedPost,
     };
   } catch (error) {
     console.error("Error fetching post:", error);
@@ -77,9 +105,20 @@ export async function getPosts() {
         slug: tag.slug,
       })),
       featuredImage: post.featuredImage,
-      featuredImageId: post.featuredImage?.imageId,
+      featuredImageId: post.featuredImage?.imageId
+        ? post.featuredImage.imageId.toString()
+        : null,
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString(),
+      seo: post.seo
+        ? {
+            metaTitle: post.seo.metaTitle,
+            metaDescription: post.seo.metaDescription,
+            canonicalUrl: post.seo.canonicalUrl,
+            focusKeywords: post.seo.focusKeywords,
+            ogImage: post.seo.ogImage,
+          }
+        : null,
     }));
 
     return {
@@ -89,26 +128,6 @@ export async function getPosts() {
   } catch (error) {
     console.error("Error fetching posts:", error);
     return { success: false, error: "Failed to fetch posts" };
-  }
-}
-
-export async function getCategories() {
-  try {
-    await connectToDatabase();
-    const categories = await Category.find({}).sort({ name: 1 });
-
-    const serializedCategories = categories.map((cat) => ({
-      _id: cat._id.toString(),
-      name: cat.name,
-      postCount: cat.postCount,
-      createdAt: cat.createdAt?.toISOString(),
-      updatedAt: cat.updatedAt?.toISOString(),
-    }));
-
-    return { success: true, categories: serializedCategories };
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    return { success: false, error: "Failed to fetch categories" };
   }
 }
 
@@ -129,31 +148,22 @@ export async function createPost(formData: PostFormData) {
     const tagIds = await getOrCreateTags(formData.tags);
     const slug = slugify(formData.title, { lower: true, strict: true });
 
-    // Extract meta description from content
-    let metaDescription = "";
-    if (formData.content?.blocks) {
-      // Try to find the first paragraph block
+    // Extract meta description from content if not provided
+    let metaDescription = formData.seo?.metaDescription || "";
+    if (!metaDescription && formData.content?.blocks) {
       const firstParagraph = formData.content.blocks.find(
         (block) => block.type === "paragraph",
       );
-
       if (firstParagraph?.data?.text) {
-        // Clean and trim the text
         metaDescription = firstParagraph.data.text
-          .replace(/\s+/g, " ") // Replace multiple spaces with single space
+          .replace(/\s+/g, " ")
           .trim()
           .slice(0, 155);
 
-        // Add ellipsis if the text was trimmed
         if (firstParagraph.data.text.length > 155) {
           metaDescription += "...";
         }
       }
-    }
-
-    // Fallback to title if no paragraph is found
-    if (!metaDescription) {
-      metaDescription = `${formData.title} - Read more about this topic on our blog.`;
     }
 
     const newPost = new Post({
@@ -165,19 +175,18 @@ export async function createPost(formData: PostFormData) {
         ? {
             url: formData.featuredImage,
             alt: formData.title,
-            imageId: formData.featuredImageId,
+            imageId: formData.featuredImageId || null,
           }
-        : undefined,
+        : null,
       slug,
       status: formData.status,
       author: authorId,
       seo: {
-        metaTitle: formData.title,
-        metaDescription: metaDescription,
-        focusKeywords: formData.tags,
-        // You can also add other SEO fields here if needed
-        // canonicalUrl: `https://yourdomain.com/blog/${slug}`,
-        // ogImage: formData.featuredImage?.url
+        metaTitle: formData.seo?.metaTitle || formData.title,
+        metaDescription,
+        canonicalUrl: formData.seo?.canonicalUrl || null,
+        focusKeywords: formData.seo?.focusKeywords || formData.tags,
+        ogImage: formData.seo?.ogImage || formData.featuredImage || null,
       },
     });
 
@@ -187,7 +196,7 @@ export async function createPost(formData: PostFormData) {
     revalidatePath("/admin/dashboard");
     revalidatePath("/blog");
 
-    return { success: true, postId: newPost._id };
+    return { success: true, postId: newPost._id.toString() };
   } catch (error) {
     await session.abortTransaction();
     console.error("Error creating post:", error);
@@ -209,29 +218,45 @@ export async function updatePost(postId: string, formData: PostFormData) {
       return { success: false, error: "Unauthorized" };
     }
 
-    const updatedPost = await Post.findByIdAndUpdate(
-      postId,
-      {
-        title: formData.title,
-        content: formData.content,
-        category: formData.category,
-        tags: formData.tags,
-        featuredImage: formData.featuredImage
-          ? {
-              url: formData.featuredImage,
-              alt: formData.title,
-              imageId: formData.featuredImageId,
-            }
-          : undefined,
-        status: formData.status,
-        seo: {
-          metaTitle: formData.title,
-          metaDescription:
-            formData.content.blocks?.[0]?.data?.text?.slice(0, 155) || "",
-        },
+    // Extract meta description from content if not provided
+    let metaDescription = formData.seo?.metaDescription || "";
+    if (!metaDescription && formData.content?.blocks) {
+      const firstParagraph = formData.content.blocks.find(
+        (block) => block.type === "paragraph",
+      );
+      if (firstParagraph?.data?.text) {
+        metaDescription = firstParagraph.data.text.slice(0, 155);
+      }
+    }
+
+    // Prepare the update data
+    const updateData = {
+      title: formData.title,
+      content: formData.content,
+      category: formData.category,
+      tags: formData.tags,
+      status: formData.status,
+      seo: {
+        metaTitle: formData.seo?.metaTitle || formData.title,
+        metaDescription,
+        canonicalUrl: formData.seo?.canonicalUrl || null,
+        focusKeywords: formData.seo?.focusKeywords || formData.tags,
+        ogImage: formData.seo?.ogImage || formData.featuredImage || null,
       },
-      { new: true },
-    );
+    };
+
+    // Only add featuredImage if it exists
+    if (formData.featuredImage) {
+      updateData.featuredImage = {
+        url: formData.featuredImage,
+        alt: formData.title,
+        imageId: formData.featuredImageId || null,
+      };
+    }
+
+    const updatedPost = await Post.findByIdAndUpdate(postId, updateData, {
+      new: true,
+    }).lean();
 
     if (!updatedPost) {
       return { success: false, error: "Post not found" };
@@ -240,7 +265,7 @@ export async function updatePost(postId: string, formData: PostFormData) {
     revalidatePath("/admin/dashboard");
     revalidatePath(`/blog/${updatedPost.slug}`);
 
-    return { success: true, postId: updatedPost._id };
+    return { success: true, postId: updatedPost._id.toString() };
   } catch (error) {
     console.error("Error updating post:", error);
     return { success: false, error: "Failed to update post" };
@@ -263,7 +288,7 @@ export async function createCategory(name: string) {
   }
 }
 
-async function getOrCreateTags(tagNames: string[]) {
+export async function getOrCreateTags(tagNames: string[]) {
   const tags = await Promise.all(
     tagNames.map(async (name) => {
       const normalized = name.trim().toLowerCase();
@@ -280,7 +305,7 @@ async function getOrCreateTags(tagNames: string[]) {
   return tags;
 }
 
-async function getOrCreateCategory(categoryName: string) {
+export async function getOrCreateCategory(categoryName: string) {
   const normalized = categoryName.trim();
   const existingCategory = await Category.findOne({ name: normalized });
   if (existingCategory) return existingCategory._id;
@@ -292,7 +317,7 @@ async function getOrCreateCategory(categoryName: string) {
   return newCategory._id;
 }
 
-async function getOrCreateUser(clerkId: string) {
+export async function getOrCreateUser(clerkId: string) {
   const existingUser = await User.findOne({ clerkId });
   if (existingUser) return existingUser._id;
 
@@ -379,7 +404,9 @@ export async function getPostBySlug(slug: string) {
         slug: tag.slug,
       })),
       featuredImage: post.featuredImage?.url || "",
-      featuredImageId: post.featuredImage?.imageId || "",
+      featuredImageId: post.featuredImage?.imageId
+        ? post.featuredImage.imageId.toString()
+        : null,
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString(),
       author: post.author
@@ -387,6 +414,15 @@ export async function getPostBySlug(slug: string) {
             id: post.author._id.toString(),
             name: post.author.name,
             email: post.author.email,
+          }
+        : null,
+      seo: post.seo
+        ? {
+            metaTitle: post.seo.metaTitle || post.title,
+            metaDescription: post.seo.metaDescription || "",
+            canonicalUrl: post.seo.canonicalUrl || null,
+            focusKeywords: post.seo.focusKeywords || [],
+            ogImage: post.seo.ogImage || post.featuredImage?.url || null,
           }
         : null,
     };
@@ -400,6 +436,34 @@ export async function getPostBySlug(slug: string) {
     return {
       success: false,
       error: "Failed to fetch post",
+    };
+  }
+}
+
+export async function getCategories() {
+  try {
+    await connectToDatabase();
+    const categories = await Category.find({}).sort({ name: 1 }).lean(); // Add lean() to get plain JavaScript objects
+
+    // Convert MongoDB objects to plain JavaScript objects
+    const serializedCategories = categories.map((cat) => ({
+      _id: cat._id.toString(),
+      name: cat.name,
+      slug: cat.slug || slugify(cat.name, { lower: true, strict: true }),
+      postCount: cat.postCount || 0,
+      createdAt: cat.createdAt ? cat.createdAt.toISOString() : null,
+      updatedAt: cat.updatedAt ? cat.updatedAt.toISOString() : null,
+    }));
+
+    return {
+      success: true,
+      categories: serializedCategories,
+    };
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return {
+      success: false,
+      error: "Failed to fetch categories",
     };
   }
 }
