@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { OutputData } from "@editorjs/editorjs";
-import ModernBlogEditor from "@/components/admin/ModernBlogEditor";
+import ModernBlogEditor from "@/components/features/admin/ModernBlogEditor";
 import {
   getPost,
   getCategories,
