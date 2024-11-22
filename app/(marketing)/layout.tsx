@@ -12,7 +12,7 @@ export default function MarketingLayout({
   return (
     <ClerkProvider dynamic>
       <AuroraBackground>
-        <div className="flex min-h-screen flex-col w-full justify-center">
+        <div className="flex min-h-screen flex-col w-full justify-center mb-8">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-0 z-[999]">
             <Link href="/" className="">
               <Image

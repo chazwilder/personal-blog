@@ -8,13 +8,13 @@ export function ListBlock({ items, style, className }: ListBlockProps) {
   return (
     <ListTag
       className={cn(
-        "my-4 text-neutral-300 text-lg",
+        "text-neutral-300 text-lg",
         style === "ordered" ? "list-decimal" : "list-disc",
         className,
       )}
     >
       {items.map((item, index) => (
-        <li key={index} className="py-2">
+        <li key={index} className="">
           <span
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(item, {
