@@ -11,18 +11,21 @@ import {
   X,
   Settings,
 } from "lucide-react";
-import ImageUpload from "@/components/admin/ImageUpload";
+import ImageUpload from "@/components/features/admin/ImageUpload";
 import { ICategory } from "@/database/category.model";
 import type { OutputData } from "@editorjs/editorjs";
 
-const BlogEditor = dynamic(() => import("@/components/admin/BlogEditor"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-[600px] w-full flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-4 border-main border-t-transparent rounded-full" />
-    </div>
-  ),
-});
+const BlogEditor = dynamic(
+  () => import("@/components/features/admin/BlogEditor"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[600px] w-full flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-main border-t-transparent rounded-full" />
+      </div>
+    ),
+  },
+);
 
 interface SEOData {
   metaTitle: string;
