@@ -1,5 +1,5 @@
 import { getPosts } from "@/lib/actions/posts.actions";
-import BlogPosts from "./BlogPosts";
+import BlogPosts from "../../../components/features/blog/BlogPosts";
 
 export default async function BlogPage() {
   const { posts = [], success } = await getPosts();

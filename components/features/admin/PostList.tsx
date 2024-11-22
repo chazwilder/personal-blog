@@ -3,11 +3,11 @@
 import React, { useOptimistic, useState, useTransition } from "react";
 import { getPosts, deletePost } from "@/lib/actions/posts.actions";
 import { useRouter } from "next/navigation";
-import { PostHeader } from "./components/PostHeader";
-import { PostFilters } from "./components/PostFilters";
-import { PostCard } from "./components/PostCard";
-import { LoadingState } from "./components/LoadingState";
-import { EmptyState } from "./components/EmptyState";
+import { PostHeader } from "@/components/features/admin/components/PostHeader";
+import { PostFilters } from "@/components/features/admin/components/PostFilters";
+import { PostCard } from "@/components/features/admin/components/PostCard";
+import { LoadingState } from "@/components/features/admin/components/LoadingState";
+import { EmptyState } from "@/components/features/admin/components/EmptyState";
 import { toast } from "@/components/ui/use-toast";
 
 interface Category {
