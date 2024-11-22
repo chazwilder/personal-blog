@@ -1,4 +1,4 @@
-import PostList from "./PostList";
+import PostList from "../../../components/features/admin/PostList";
 import { getPosts } from "@/lib/actions/posts.actions";
 
 export default async function AdminDashboard() {

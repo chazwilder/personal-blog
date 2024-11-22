@@ -38,3 +38,10 @@ export const AUTHOR_INFO = {
     },
   ],
 };
+
+export const AFFILIATE_LINKS = [
+  {
+    text: "Get $200 in credit at Digital Ocean!",
+    link: "https://m.do.co/c/46df717e0ee7",
+  },
+];
