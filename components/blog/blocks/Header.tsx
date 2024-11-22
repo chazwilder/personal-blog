@@ -7,7 +7,7 @@ export function HeaderBlock({ level, text, className }: HeaderBlockProps) {
   return (
     <TagName
       className={cn(
-        "font-bold py-4",
+        "font-bold",
         level === 1 && "text-4xl",
         level === 2 && "text-3xl",
         level === 3 && "text-2xl",

@@ -197,7 +197,7 @@ export default function ClientBlogPost({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12 flex flex-col lg:flex-row gap-8 relative z-[100] w-full">
+    <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12 flex flex-col lg:flex-row gap-4 relative z-[100] w-full">
       {/* Main Content */}
       <article className="flex-1 w-full lg:max-w-3xl mx-auto">
         <PostHeader
