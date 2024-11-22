@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import EditorPage from "@/components/admin/EditorPage";
+import EditorPage from "@/components/features/admin/EditorPage";
 import { useParams } from "next/navigation";
 
 export default function EditPostPage() {
