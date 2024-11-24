@@ -33,6 +33,8 @@
     "@editorjs/raw": "^2.5.0",
     "@editorjs/table": "^2.4.2",
     "@editorjs/warning": "^1.4.0",
+    "@next/third-parties": "^15.0.3",
+    "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-icons": "^1.3.0",
     "@radix-ui/react-toast": "^1.2.2",
     "@sendgrid/mail": "^8.1.4",
@@ -43,6 +45,7 @@
     "@types/prismjs": "^1.26.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "editorjs-alert": "^1.1.4",
     "editorjs-header-with-anchor": "^2.6.0",
     "editorjs-hyperlink": "^1.0.6",
@@ -65,7 +68,8 @@
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "title-editorjs": "^1.0.2",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "^20",
