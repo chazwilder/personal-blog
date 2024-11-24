@@ -21,13 +21,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <GDPRDataProcessor>
-            <AnalyticsProvider>
-              {children}
-              <CookieConsentBanner />
-              <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
-            </AnalyticsProvider>
-          </GDPRDataProcessor>
+          {children}
         </ThemeProvider>
       </body>
     </html>
