@@ -3,13 +3,11 @@
 import { useEffect } from "react";
 import { useCookieStore } from "../gdpr";
 import { event } from "./gtag";
+import { Suspense } from "react";
 
-interface AnalyticsProviderProps {
-  children: React.ReactNode;
-}
-
-export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
+function AnalyticsContent({ children }: { children: React.ReactNode }) {
   const { consent } = useCookieStore();
+
   useEffect(() => {
     if (consent.analytics) {
       const handleContactFormSubmit = () => {
@@ -32,4 +30,12 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
   }, [consent.analytics]);
 
   return <>{children}</>;
+}
+
+export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <AnalyticsContent>{children}</AnalyticsContent>
+    </Suspense>
+  );
 }
