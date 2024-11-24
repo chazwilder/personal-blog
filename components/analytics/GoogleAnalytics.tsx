@@ -3,15 +3,15 @@
 import { GoogleAnalytics as NextGoogleAnalytics } from "@next/third-parties/google";
 import { useCookieStore } from "../gdpr";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
-export function GoogleAnalytics({ gaId }: { gaId: string }) {
+function GoogleAnalyticsContent({ gaId }: { gaId: string }) {
   const { consent } = useCookieStore();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (consent.analytics && window.gtag) {
+    if (consent.analytics && window.gtag && gaId) {
       const url =
         pathname +
         (searchParams?.toString() ? `?${searchParams.toString()}` : "");
@@ -24,4 +24,14 @@ export function GoogleAnalytics({ gaId }: { gaId: string }) {
   if (!consent.analytics) return null;
 
   return <NextGoogleAnalytics gaId={gaId} />;
+}
+
+export function GoogleAnalytics({ gaId }: { gaId: string }) {
+  if (!gaId) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <GoogleAnalyticsContent gaId={gaId} />
+    </Suspense>
+  );
 }
