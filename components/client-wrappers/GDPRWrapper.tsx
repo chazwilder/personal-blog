@@ -3,6 +3,7 @@
 import { CookieConsentBanner, GDPRDataProcessor } from "@/components/gdpr";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
+import TrackingPixels from "@/components/TrackingPixels";
 import { useEffect, useState } from "react";
 
 export default function GDPRWrapper({
@@ -22,6 +23,7 @@ export default function GDPRWrapper({
         {children}
         <CookieConsentBanner />
         {gaId && <GoogleAnalytics gaId={gaId} />}
+        <TrackingPixels />
       </AnalyticsProvider>
     </GDPRDataProcessor>
   );
