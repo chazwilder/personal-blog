@@ -139,6 +139,7 @@ export async function createPost(formData: PostFormData) {
     await connectToDatabase();
     const { userId } = await auth();
 
+    console.log(await auth());
     if (!userId) {
       throw new Error("Unauthorized");
     }
@@ -321,14 +322,36 @@ export async function getOrCreateUser(clerkId: string) {
   const existingUser = await User.findOne({ clerkId });
   if (existingUser) return existingUser._id;
 
-  const newUser = await User.create({
-    clerkId,
-    username: `user_${clerkId}`,
-    email: `user_${clerkId}@example.com`,
-    name: `User ${clerkId}`,
-    role: "author",
-  });
-  return newUser._id;
+  // Generate a shorter, unique username
+  const baseUsername = "user";
+  const randomSuffix = Math.random().toString(36).substring(2, 8);
+  const username = `${baseUsername}_${randomSuffix}`;
+
+  // Fetch user data from Clerk
+  try {
+    const user = await clerkClient.users.getUser(clerkId);
+
+    const newUser = await User.create({
+      clerkId,
+      username, // Using the generated shorter username
+      email: user.emailAddresses[0]?.emailAddress || `${username}@example.com`,
+      name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || username,
+      role: "author",
+    });
+
+    return newUser._id;
+  } catch (error) {
+    // Fallback if Clerk API call fails
+    const newUser = await User.create({
+      clerkId,
+      username,
+      email: `${username}@example.com`,
+      name: username,
+      role: "author",
+    });
+
+    return newUser._id;
+  }
 }
 
 export async function deletePost(postId: string) {

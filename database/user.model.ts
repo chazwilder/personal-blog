@@ -1,4 +1,4 @@
-import { Schema, model, models, Document } from "mongoose";
+import { Document, model, models, Schema } from "mongoose";
 
 export interface IUser extends Document {
   clerkId: string;
@@ -29,7 +29,7 @@ const userSchema = new Schema<IUser>(
       trim: true,
       lowercase: true,
       minlength: [3, "Username must be at least 3 characters long"],
-      maxlength: [30, "Username cannot exceed 30 characters"],
+      maxlength: [100, "Username cannot exceed 100 characters"],
       match: [
         /^[a-zA-Z0-9_-]+$/,
         "Username can only contain letters, numbers, underscores and dashes",
